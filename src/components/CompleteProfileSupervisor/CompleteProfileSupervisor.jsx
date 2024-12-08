@@ -36,7 +36,7 @@ const CompleteProfileSupervisor = () => {
       setShowAlert(true);
 
       setTimeout(() => {
-        navigate('/LoginTeacher');
+        navigate('/LoginSupervisor');
       }, 2000);
 
     } catch (error) {

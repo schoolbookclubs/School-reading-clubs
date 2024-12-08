@@ -1,19 +1,26 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import Navbar from '../Navbar/Navbar.jsx';  // Import the Navbar component
+import { DataContext } from '../../context/context.js';
+import MainNavbar from '../Navbar/Navbar.jsx';
 
 const Protected = ({ children }) => {
+  const { getUserRole, getLoginPath } = useContext(DataContext);
   const token = localStorage.getItem('token');
+  const role = getUserRole();
 
-  // If the token is not found, redirect to the login page
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
-  // If the token exists, render the Navbar and children components
+  if (!role) {
+    // إذا لم يكن هناك دور محدد، قم بتوجيه المستخدم إلى صفحة تسجيل الدخول المناسبة
+    return <Navigate to={getLoginPath(role)} replace />;
+  }
+
+  // إذا كان هناك token وتم تحديد الدور، اعرض المحتوى
   return (
     <>
-      <Navbar /> 
+      <MainNavbar />
       {children}
     </>
   );

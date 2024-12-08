@@ -20,28 +20,27 @@ export default function LoginSupervisor() {
         .min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
     });
 
-    const handleSubmit = async (values, { setSubmitting }) => {
+    const handleSubmit = async (values) => {
       try {
-        const response = await axios.post('https://school-book-clubs-backend.vercel.app/api/Supervisor/loginSupervisor', {
-          email: values.email,
-          password: values.password,
-        });
-
-        setAlertVariant('success');
-        setAlertMessage(response?.data?.message);
-        setShowAlert(true);
-        
-        // Handle successful login (e.g., store token, redirect)
-        setTimeout(() => {
-          navigate('/dashboard'); // Replace with your dashboard route
-        }, 1500);
-
+        const { data } = await axios.post('https://school-book-clubs-backend.vercel.app/api/Supervisor/loginSupervisor', values);
+        console.log(data);
+        if (data.message === 'success') {
+          // تخزين التوكن في localStorage
+          localStorage.setItem('token', data.token);
+          setAlertVariant('success');
+          setAlertMessage('تم تسجيل الدخول بنجاح');
+          setShowAlert(true);
+          
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 2000);
+        }
       } catch (error) {
+        console.log(error);
         setAlertVariant('danger');
-        setAlertMessage(error.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول');
+        setAlertMessage('فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.');
         setShowAlert(true);
       }
-      setSubmitting(false);
     };
 
     return (

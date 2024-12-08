@@ -3,19 +3,7 @@
     padding: 0;
     box-sizing: border-box;
 }
-.welcome-container {
-    background: linear-gradient(
-        rgba(0, 0, 0, 0.2),
-        rgba(0, 0, 0, 0.6)
-    ),
-    url("../../images/background.jpg"); /* صورة الخلفية */
-    background-size: cover;
-    background-position: center;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+
 
 .welcome-page {
   direction: rtl;

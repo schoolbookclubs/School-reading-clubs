@@ -1,16 +1,19 @@
 // RedirectIfAuthenticated.jsx
-import React from 'react';
+import React, { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
+import { DataContext } from '../../context/context.js';
 
 const RedirectIfAuthenticated = ({ children }) => {
+  const { getUserRole } = useContext(DataContext);
   const token = localStorage.getItem('token');
+  const role = getUserRole();
 
-  // If the token exists, redirect to the home page
-  if (token) {
-    return <Navigate to="/HomePage" replace />;
+  if (token && role) {
+    // إذا كان المستخدم مسجل الدخول، قم بتوجيهه إلى لوحة التحكم
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // If there is no token, render the children (i.e., login or signup)
+  // إذا لم يكن المستخدم مسجل الدخول، اعرض المحتوى
   return children;
 };
 

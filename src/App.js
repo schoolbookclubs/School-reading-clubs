@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import DataContextFunction from './context/context';
+import DataContextFunction from './context/context.js';
 import Layout from './components/layout/Layout.jsx';
 import WelcomePage from './components/WelcomePage/WelcomePage.jsx';
 import { ToastContainer } from 'react-toastify';
@@ -10,7 +10,6 @@ import ForgetPasswordteacher from './components/ForgetPasswordteacher/ForgetPass
 import ForgotPasswordsupervisor from './components/ForgetPasswordsupervisor/ForgetPasswordsupervisor.jsx';
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated/RedirectIfAuthenticated.jsx';
 import Notfoundpage from './components/Notfoundpage/Notfoundpage.jsx';
-import HomePage from './components/HomePage/HomePage.jsx';
 import Protected from './components/Protucted/Protucted.jsx';
 import LoginStudent from './components/LoginStudent/LoginStudent.jsx';
 import SignupStudent from './components/SignupStudent/SignupStudent.jsx';
@@ -21,17 +20,16 @@ import SignupParent from './components/SignupParent/SignupParent.jsx';
 import CompleteProfileTeacher from './components/CompleteProfileTeacher/CompleteProfileTeacher.jsx';
 import CompleteProfileSupervisor from './components/CompleteProfileSupervisor/CompleteProfileSupervisor.jsx';
 import LoginSupervisor from './components/LoginSupervisor/LoginSupervisor.jsx';
+import Dashboard from './components/Dashboard/Dashboard.jsx';
 
 export default function App() {
-  // Set up the router LoginStudent
-  //LoginSupervisor
-  let router = createBrowserRouter([
+  const router = createBrowserRouter([
     {
       path: '',
       element: <Layout />,
       children: [
         { index: true, element: <WelcomePage /> },
-        { path: '/HomePage', element: <Protected><HomePage /></Protected> },
+        { path: '/dashboard', element: <Protected><Dashboard /></Protected> },
         { 
           path: '/LoginStudent', 
           element: <RedirectIfAuthenticated><LoginStudent /></RedirectIfAuthenticated> 
@@ -48,7 +46,6 @@ export default function App() {
           path: '/LoginSupervisor', 
           element: <RedirectIfAuthenticated><LoginSupervisor /></RedirectIfAuthenticated> 
         },
-
         { 
           path: '/SignupStudent', 
           element: <RedirectIfAuthenticated><SignupStudent /></RedirectIfAuthenticated> 
@@ -61,13 +58,34 @@ export default function App() {
           path: '/SignupParent', 
           element: <RedirectIfAuthenticated><SignupParent /></RedirectIfAuthenticated> 
         },
-        { path: '/forgot-password-student', element: <ForgetPasswordstudent /> },
-        { path: '/forgot-password-parent', element: <ForgetPasswordParent /> },
-        { path: '/forgot-password-teacher', element: <ForgetPasswordteacher /> },
-        { path: '/forgot-password-supervisor', element: <ForgotPasswordsupervisor /> },
-        { path: '/complete-profile-teacher', element: <CompleteProfileTeacher /> },
-        { path: '/complete-profile-supervisor', element: <CompleteProfileSupervisor /> },
-        { path: "*", element: <Notfoundpage /> }
+        { 
+          path: '/CompleteProfileTeacher', 
+          element: <Protected><CompleteProfileTeacher /></Protected> 
+        },
+        { 
+          path: '/CompleteProfileSupervisor', 
+          element: <Protected><CompleteProfileSupervisor /></Protected> 
+        },
+        { 
+          path: '/ForgetPasswordstudent', 
+          element: <ForgetPasswordstudent /> 
+        },
+        { 
+          path: '/ForgetPasswordParent', 
+          element: <ForgetPasswordParent /> 
+        },
+        { 
+          path: '/ForgetPasswordteacher', 
+          element: <ForgetPasswordteacher /> 
+        },
+        { 
+          path: '/ForgotPasswordsupervisor', 
+          element: <ForgotPasswordsupervisor /> 
+        },
+        { 
+          path: '*', 
+          element: <Notfoundpage /> 
+        }
       ]
     }
   ]);
@@ -75,7 +93,7 @@ export default function App() {
   return (
     <DataContextFunction>
       <RouterProvider router={router} />
-      <ToastContainer /> {/* Include ToastContainer here if you need to display notifications */}
+      <ToastContainer />
     </DataContextFunction>
   );
 }

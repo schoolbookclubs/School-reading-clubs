@@ -1,8 +1,8 @@
 import React from 'react';
+import { Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './WelcomePage.css';
 import { Helmet } from 'react-helmet';
-import { Container, Row, Col } from 'react-bootstrap';
 
 export default function WelcomePage() {
   const userTypes = [

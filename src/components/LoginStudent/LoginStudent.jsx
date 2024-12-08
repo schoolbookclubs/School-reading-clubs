@@ -22,23 +22,23 @@ const LoginStudent = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const response = await axios.post('https://school-book-clubs-backend.vercel.app/api/student/login', {
-        email: values.email,
-        password: values.password,
-      });
-
-      setAlertVariant('success');
-      setAlertMessage(response?.data?.message);
-      setShowAlert(true);
+      const { data } = await axios.post('https://school-book-clubs-backend.vercel.app/api/student/login', values);
       
-      // Handle successful login (e.g., store token, redirect)
-      setTimeout(() => {
-        navigate('/dashboard'); // Replace with your dashboard route
-      }, 2000);
+      if (data.message === 'success') {
+        // تخزين التوكن في localStorage
+        localStorage.setItem('token', data.token);
+        setAlertVariant('success');
+        setAlertMessage('تم تسجيل الدخول بنجاح');
+        setShowAlert(true);
+        
+        setTimeout(() => {
+          navigate('/dashboard'); 
+        }, 2000);
 
+      }
     } catch (error) {
       setAlertVariant('danger');
-      setAlertMessage(error.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول');
+      setAlertMessage('فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.');
       setShowAlert(true);
     }
     setSubmitting(false);

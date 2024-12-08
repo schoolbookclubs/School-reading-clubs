@@ -13,11 +13,9 @@ const Protected = ({ children }) => {
   }
 
   if (!role) {
-    // إذا لم يكن هناك دور محدد، قم بتوجيه المستخدم إلى صفحة تسجيل الدخول المناسبة
     return <Navigate to={getLoginPath(role)} replace />;
   }
 
-  // إذا كان هناك token وتم تحديد الدور، اعرض المحتوى
   return (
     <>
       <MainNavbar />

@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 export const DataContext = createContext();
 
@@ -7,17 +8,7 @@ export default function DataContextFunction({ children }) {
 
   function decodeToken(token) {
     try {
-      const [, payloadBase64] = token.split('.');
-      
-      const base64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-
-      return JSON.parse(jsonPayload);
+      return jwtDecode(token);
     } catch (error) {
       console.error('Error decoding token:', error);
       return null;
@@ -25,9 +16,7 @@ export default function DataContextFunction({ children }) {
   }
 
   function getUserRole() {
-    const token = localStorage.getItem('token');
     if (!token) return null;
-    
     const decodedToken = decodeToken(token);
     return decodedToken?.role || null;
   }

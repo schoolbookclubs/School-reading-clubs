@@ -56,7 +56,7 @@ const MainNavbar = () => {
   return (
     <BootstrapNavbar bg="light" expand="lg" className="rtl-navbar">
       <Container>
-        <BootstrapNavbar.Brand as={Link} to="/dashboard">نادي الكتاب المدرسي</BootstrapNavbar.Brand>
+        <BootstrapNavbar.Brand as={Link} to="/dashboard">برنامج أندية القراءة المدرسية</BootstrapNavbar.Brand>
         <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
         <BootstrapNavbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">{getNavItems()}</Nav>

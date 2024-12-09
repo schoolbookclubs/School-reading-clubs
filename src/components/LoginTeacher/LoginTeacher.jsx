@@ -26,8 +26,7 @@ export default function LoginTeacher() {
     const handleSubmit = async (values) => {
       try {
         const { data } = await axios.post('https://school-book-clubs-backend.vercel.app/api/Teacher/loginTeacher', values);
-        
-        if (data.success == 200) {
+        if (data.status == 200) {
           setTokenAndUpdateRole(data.token);
         setAlertVariant("success");
         setAlertMessage("تم تسجيل الدخول بنجاح");

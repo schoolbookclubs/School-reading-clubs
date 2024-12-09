@@ -9,6 +9,11 @@ const MainNavbar = () => {
   const role = getUserRole();
 
   const getNavItems = () => {
+    if (!role) {
+      console.warn('No user role detected in Navbar');
+      return null;
+    }
+
     switch (role) {
       case 'طالب':
         return (
@@ -43,6 +48,7 @@ const MainNavbar = () => {
           </>
         );
       default:
+        console.warn(`Unhandled user role: ${role}`);
         return null;
     }
   };
@@ -53,9 +59,7 @@ const MainNavbar = () => {
         <BootstrapNavbar.Brand as={Link} to="/dashboard">نادي الكتاب المدرسي</BootstrapNavbar.Brand>
         <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
         <BootstrapNavbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            {getNavItems()}
-          </Nav>
+          <Nav className="me-auto">{getNavItems()}</Nav>
           <Nav>
             {role && (
               <Nav.Link onClick={logout} className="text-danger">

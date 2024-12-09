@@ -1,28 +1,32 @@
-import { createContext } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { createContext, useEffect, useState } from 'react';
+import {jwtDecode} from 'jwt-decode';
 
 export const DataContext = createContext();
 
 export default function DataContextFunction({ children }) {
-  const token = localStorage.getItem("token");
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [userRole, setUserRole] = useState(null);
 
-  function decodeToken(token) {
+  useEffect(() => {
+    if (token) {
+      const decoded = decodeToken(token);
+      setUserRole(decoded?.role || null);
+    } else {
+      setUserRole(null);
+    }
+  }, [token]);
+
+  const decodeToken = (token) => {
     try {
       return jwtDecode(token);
     } catch (error) {
       console.error('Error decoding token:', error);
       return null;
     }
-  }
+  };
 
-  function getUserRole() {
-    if (!token) return null;
-    const decodedToken = decodeToken(token);
-    return decodedToken?.role || null;
-  }
-
-  function getLoginPath(role) {
-    switch (role) {
+  const getLoginPath = () => {
+    switch (userRole) {
       case 'طالب':
         return '/LoginStudent';
       case 'معلم':
@@ -34,21 +38,29 @@ export default function DataContextFunction({ children }) {
       default:
         return '/';
     }
-  }
+  };
 
-  function logout() {
+  const logout = () => {
     localStorage.removeItem('token');
+    setToken(null);
     window.location.href = '/';
-  }
+  };
+
+  // Add a method to manually set token and trigger role update
+  const setTokenAndUpdateRole = (newToken) => {
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
+  };
 
   return (
     <DataContext.Provider
       value={{
         token,
         decodeToken,
-        getUserRole,
+        getUserRole: () => userRole,
         getLoginPath,
-        logout
+        logout,
+        setTokenAndUpdateRole,
       }}
     >
       {children}

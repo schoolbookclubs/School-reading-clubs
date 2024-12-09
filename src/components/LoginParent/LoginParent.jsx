@@ -3,10 +3,13 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { Container, Row, Col, Card, Form as BootstrapForm, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { DataContext } from '../../context/context.js';
+import { useContext } from 'react';
 import axios from 'axios';
 
 const LoginParent = () => {
   const navigate = useNavigate();
+  const { setTokenAndUpdateRole } = useContext(DataContext);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertVariant, setAlertVariant] = useState('success');
@@ -24,20 +27,20 @@ const LoginParent = () => {
     try {
       const { data } = await axios.post('https://school-book-clubs-backend.vercel.app/api/parent/login', values);
       
-      if (data.message === 'success') {
-        // تخزين التوكن في localStorage
-        localStorage.setItem('token', data.token);
-        setAlertVariant('success');
-        setAlertMessage('تم تسجيل الدخول بنجاح');
+      if (data.status == 200) {
+        // Use the new method to set token and update role
+        setTokenAndUpdateRole(data.token);
+        setAlertVariant("success");
+        setAlertMessage("تم تسجيل الدخول بنجاح");
         setShowAlert(true);
-        
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate("/dashboard"); // إعادة التوجيه إلى صفحة dashboard
         }, 2000);
       }
     } catch (error) {
-      setAlertVariant('danger');
-      setAlertMessage('فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.');
+      console.log(error);
+      setAlertVariant("danger");
+      setAlertMessage(error.response.data.message);
       setShowAlert(true);
     }
   };

@@ -4,9 +4,12 @@ import * as Yup from 'yup';
 import { Container, Row, Col, Card, Form as BootstrapForm, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useContext } from 'react';
+import { DataContext } from '../../context/context.js';
 
 export default function LoginTeacher() {
     const navigate = useNavigate();
+    const { setTokenAndUpdateRole } = useContext(DataContext);
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
     const [alertVariant, setAlertVariant] = useState('success');
@@ -24,20 +27,19 @@ export default function LoginTeacher() {
       try {
         const { data } = await axios.post('https://school-book-clubs-backend.vercel.app/api/Teacher/loginTeacher', values);
         
-        if (data.message === 'success') {
-          // تخزين التوكن في localStorage
-          localStorage.setItem('token', data.token);
-          setAlertVariant('success');
-          setAlertMessage('تم تسجيل الدخول بنجاح');
-          setShowAlert(true);
-          
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 2000);
+        if (data.success == 200) {
+          setTokenAndUpdateRole(data.token);
+        setAlertVariant("success");
+        setAlertMessage("تم تسجيل الدخول بنجاح");
+        setShowAlert(true);
+        setTimeout(() => {
+          navigate("/dashboard"); // إعادة التوجيه إلى صفحة dashboard
+        }, 2000);
         }
       } catch (error) {
-        setAlertVariant('danger');
-        setAlertMessage('فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.');
+        console.log(error);
+        setAlertVariant("danger");
+        setAlertMessage(error.response.data.message);
         setShowAlert(true);
       }
     };
@@ -123,7 +125,7 @@ export default function LoginTeacher() {
                     <Button
                       variant="link"
                       className="p-0 fs-5 text-decoration-none"
-                      onClick={() => navigate('/forgot-password-teacher')}
+                      onClick={() => navigate('/ForgetPasswordteacher')}
                     >
                       هل نسيت كلمة المرور؟
                     </Button>

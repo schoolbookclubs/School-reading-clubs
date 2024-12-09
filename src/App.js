@@ -60,27 +60,27 @@ export default function App() {
         },
         { 
           path: '/CompleteProfileTeacher', 
-          element: <Protected><CompleteProfileTeacher /></Protected> 
+          element: <RedirectIfAuthenticated><CompleteProfileTeacher /></RedirectIfAuthenticated> 
         },
         { 
           path: '/CompleteProfileSupervisor', 
-          element: <Protected><CompleteProfileSupervisor /></Protected> 
+          element: <RedirectIfAuthenticated><CompleteProfileSupervisor /></RedirectIfAuthenticated> 
         },
         { 
           path: '/ForgetPasswordstudent', 
-          element: <ForgetPasswordstudent /> 
+          element: <RedirectIfAuthenticated>  <ForgetPasswordstudent /></RedirectIfAuthenticated> 
         },
         { 
           path: '/ForgetPasswordParent', 
-          element: <ForgetPasswordParent /> 
+          element: <RedirectIfAuthenticated><ForgetPasswordParent /></RedirectIfAuthenticated> 
         },
         { 
           path: '/ForgetPasswordteacher', 
-          element: <ForgetPasswordteacher /> 
+          element: <RedirectIfAuthenticated><ForgetPasswordteacher /></RedirectIfAuthenticated> 
         },
         { 
           path: '/ForgotPasswordsupervisor', 
-          element: <ForgotPasswordsupervisor /> 
+          element: <RedirectIfAuthenticated><ForgotPasswordsupervisor /></RedirectIfAuthenticated> 
         },
         { 
           path: '*', 

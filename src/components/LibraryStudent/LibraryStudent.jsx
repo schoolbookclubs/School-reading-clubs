@@ -38,7 +38,9 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
     dislikedIdeas: '',
     memorableQuotes: '',
     potentialAdditions: '',
-    personalImpact: ''
+    personalImpact: '',
+    readingStartDate: '',
+    readingEndDate: ''
   });
   const [errors, setErrors] = useState({});
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -53,7 +55,7 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
 
     // Check all text fields
     Object.keys(review).forEach(key => {
-      if (!review[key].trim()) {
+      if (!review[key].trim() && key !== 'readingStartDate' && key !== 'readingEndDate') {
         newErrors[key] = 'هذا الحقل مطلوب';
       }
     });
@@ -61,6 +63,25 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
     // Check recommendation
     if (!review.recommendBook) {
       newErrors.recommendBook = 'يرجى اختيار توصيتك للكتاب';
+    }
+
+    // Validate reading dates
+    if (!review.readingStartDate) {
+      newErrors.readingStartDate = 'يرجى إدخال تاريخ بدء القراءة';
+    }
+
+    if (!review.readingEndDate) {
+      newErrors.readingEndDate = 'يرجى إدخال تاريخ انتهاء القراءة';
+    }
+
+    // Ensure end date is after start date
+    if (review.readingStartDate && review.readingEndDate) {
+      const startDate = new Date(review.readingStartDate);
+      const endDate = new Date(review.readingEndDate);
+
+      if (endDate < startDate) {
+        newErrors.readingEndDate = 'يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء';
+      }
     }
 
     setErrors(newErrors);
@@ -285,6 +306,50 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
             />
             {errors.personalImpact && <p className="error-message">{errors.personalImpact}</p>}
           </div>
+
+          <div className="review-group reading-dates-container">
+            <h3>تاريخ القراءة</h3>
+            <div className="date-input-group">
+              <div className="date-input-wrapper">
+                <label htmlFor="readingStartDate" className="date-label">
+                  <span className="date-label-icon">📖</span>
+                  تاريخ بدء القراءة
+                </label>
+                <input 
+                  type="date"
+                  id="readingStartDate"
+                  name="readingStartDate"
+                  className="date-input"
+                  value={review.readingStartDate}
+                  onChange={handleReviewChange}
+                  required
+                />
+                {errors.readingStartDate && <p className="error-message">{errors.readingStartDate}</p>}
+              </div>
+              
+              <div className="date-input-wrapper">
+                <label htmlFor="readingEndDate" className="date-label">
+                  <span className="date-label-icon">🏁</span>
+                  تاريخ انتهاء القراءة
+                </label>
+                <input 
+                  type="date"
+                  id="readingEndDate"
+                  name="readingEndDate"
+                  className="date-input"
+                  value={review.readingEndDate}
+                  onChange={handleReviewChange}
+                  required
+                />
+                {errors.readingEndDate && <p className="error-message">{errors.readingEndDate}</p>}
+              </div>
+            </div>
+            {(errors.readingStartDate || errors.readingEndDate) && (
+              <div className="date-validation-info">
+                <p>💡 تأكد من اختيار تاريخ البدء قبل تاريخ الانتهاء</p>
+              </div>
+            )}
+          </div>
         </div>
         <div className="modal-actions">
           <button 
@@ -348,6 +413,8 @@ export default function LibraryStudent() {
         memorableQuotes: reviewData.memorableQuotes,
         potentialAdditions: reviewData.potentialAdditions,
         personalImpact: reviewData.personalImpact,
+        readingStartDate: reviewData.readingStartDate,
+        readingEndDate: reviewData.readingEndDate,
         bookRating: Math.max(1, reviewData.rating || 0)
       });
       

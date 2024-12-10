@@ -391,3 +391,81 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Reading Dates Section */
+.reading-dates-container {
+  background-color: #f9f5f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.reading-dates-container h3 {
+  color: #4a4a4a;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.date-input-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.date-input-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.date-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  color: #666;
+  font-weight: 600;
+}
+
+.date-label-icon {
+  margin-left: 10px;
+  font-size: 1.2em;
+}
+
+.date-input {
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background-color: white;
+  color: #333;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.date-validation-info {
+  margin-top: 15px;
+  text-align: center;
+  background-color: #f0f8ff;
+  padding: 10px;
+  border-radius: 8px;
+  color: #555;
+}
+
+.date-validation-info p {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-validation-info p::before {
+  content: '💡';
+  margin-left: 10px;
+}

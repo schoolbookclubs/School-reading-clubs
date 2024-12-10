@@ -27,7 +27,7 @@ const LoginParent = () => {
     try {
       const { data } = await axios.post('https://school-book-clubs-backend.vercel.app/api/parent/login', values);
       
-      if (data.status == 200) {
+      if (data.message == 'تم تسجيل الدخول بنجاح') {
         // Use the new method to set token and update role
         setTokenAndUpdateRole(data.token);
         setAlertVariant("success");

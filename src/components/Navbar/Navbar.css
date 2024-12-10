@@ -16,9 +16,9 @@
 
 /* Hover effect */
 .nav-link:hover {
-    background-color: rgb(62, 198, 98); 
+    /* background-color: rgb(62, 198, 98);  */
     border-radius: 50px;
-    color: #000 ;
+    color: #000 !important;
 }
 
 .dropdown {

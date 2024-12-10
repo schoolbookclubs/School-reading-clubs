@@ -25,8 +25,8 @@ const LoginStudent = () => {
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const { data } = await axios.post('https://school-book-clubs-backend.vercel.app/api/student/login', values);
-      
-      if (data.status == 200) {
+      console.log(data);
+      if (data.success == true) {
         // Use the new method to set token and update role
         setTokenAndUpdateRole(data.token);
         setAlertVariant("success");

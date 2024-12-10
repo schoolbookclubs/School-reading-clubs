@@ -21,15 +21,27 @@ import CompleteProfileTeacher from './components/CompleteProfileTeacher/Complete
 import CompleteProfileSupervisor from './components/CompleteProfileSupervisor/CompleteProfileSupervisor.jsx';
 import LoginSupervisor from './components/LoginSupervisor/LoginSupervisor.jsx';
 import Dashboard from './components/Dashboard/Dashboard.jsx';
-
+import AddBooks from './components/AddBooks/AddBooks.jsx';
+import TeacherBooks from './components/TeacherBooks/TeacherBooks.jsx';
+import StudentsTeacher from './components/StudentsTeacher/StudentsTeacher.jsx';
+import ProfileStudent from './components/ProfileStudent/ProfileStudent.jsx';
+import LibraryStudent from './components/LibraryStudent/LibraryStudent.jsx';
+import Selfassessment from './components/Selfassessment/Selfassessment.jsx';
+import Parentprofile from './components/Parentprofile/Parentprofile.jsx';
+import Parentassessment from './components/Parentassessment/Parentassessment.jsx';
 export default function App() {
   const router = createBrowserRouter([
     {
       path: '',
       element: <Layout />,
       children: [
-        { index: true, element: <WelcomePage /> },
+        { index: true, element: <RedirectIfAuthenticated><WelcomePage /></RedirectIfAuthenticated> },
         { path: '/dashboard', element: <Protected><Dashboard /></Protected> },
+        { path: '/ProfileStudent', element: <Protected><ProfileStudent /></Protected> },
+        { path: '/books', element: <Protected><AddBooks /></Protected> },
+        { path: '/LibraryStudent', element: <Protected><LibraryStudent /></Protected> },
+        { path: '/Teacherbooks', element: <Protected><TeacherBooks /></Protected> },
+        { path: '/Selfassessment', element: <Protected><Selfassessment /></Protected> },
         { 
           path: '/LoginStudent', 
           element: <RedirectIfAuthenticated><LoginStudent /></RedirectIfAuthenticated> 
@@ -81,6 +93,22 @@ export default function App() {
         { 
           path: '/ForgotPasswordsupervisor', 
           element: <RedirectIfAuthenticated><ForgotPasswordsupervisor /></RedirectIfAuthenticated> 
+        },
+        { 
+          path: '/StudentsTeacher', 
+          element: <Protected><StudentsTeacher /></Protected> 
+        },
+        { 
+          path: '/Parentprofile', 
+          element: <Protected><Parentprofile /></Protected> 
+        },
+        { 
+          path: '/Parentprofile', 
+          element: <Protected><Parentprofile /></Protected> 
+        },
+        { 
+          path: '/Parentassessment', 
+          element: <Protected><Parentassessment /></Protected> 
         },
         { 
           path: '*', 

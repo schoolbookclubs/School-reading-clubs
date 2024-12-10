@@ -19,16 +19,18 @@ const MainNavbar = () => {
         return (
           <>
             <Nav.Link as={Link} to="/dashboard">لوحة التحكم</Nav.Link>
-            <Nav.Link as={Link} to="/profile">الملف الشخصي</Nav.Link>
-            <Nav.Link as={Link} to="/books">الكتب</Nav.Link>
+            <Nav.Link as={Link} to="/ProfileStudent">الملف الشخصي</Nav.Link>
+            <Nav.Link as={Link} to="/LibraryStudent">الكتب</Nav.Link>
+            <Nav.Link as={Link} to="/Selfassessment">التقييم الذاتي</Nav.Link>
           </>
         );
       case 'معلم':
         return (
           <>
-            <Nav.Link as={Link} to="/dashboard">لوحة التحكم</Nav.Link>
-            <Nav.Link as={Link} to="/students">الطلاب</Nav.Link>
-            <Nav.Link as={Link} to="/books">الكتب</Nav.Link>
+            <Nav.Link as={Link} to="/dashboard" className=''>الصفحة الرئيسية</Nav.Link>
+            <Nav.Link as={Link} to="/books">اضافة كتاب</Nav.Link>
+            <Nav.Link as={Link} to="/Teacherbooks">الكتب </Nav.Link>
+            <Nav.Link as={Link} to="/StudentsTeacher">تقييم الطلاب</Nav.Link>
           </>
         );
       case 'مشرف':
@@ -43,8 +45,8 @@ const MainNavbar = () => {
         return (
           <>
             <Nav.Link as={Link} to="/dashboard">لوحة التحكم</Nav.Link>
-            <Nav.Link as={Link} to="/children">أبنائي</Nav.Link>
-            <Nav.Link as={Link} to="/progress">متابعة التقدم</Nav.Link>
+            <Nav.Link as={Link} to="/Parentprofile">بياناتي الشخصية</Nav.Link>
+            <Nav.Link as={Link} to="/Parentassessment">تقييم ولي الامر</Nav.Link>
           </>
         );
       default:

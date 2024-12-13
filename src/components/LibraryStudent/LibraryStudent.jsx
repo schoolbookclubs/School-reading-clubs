@@ -14,8 +14,8 @@ const SuccessPopup = ({ onClose }) => {
     <div className="success-popup">
       <div className="success-popup-content">
         <FaCheckCircle className="success-icon" />
-        <h2>تم إرسال تقييمك بنجاح!</h2>
-        <p>شكراً لك على مشاركة رأيك</p>
+        <h2 >تم إرسال تقييمك بنجاح!</h2>
+        <p >شكراً لك على مشاركة رأيك</p>
         <div className="success-popup-animation"></div>
       </div>
     </div>
@@ -372,12 +372,163 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
   );
 };
 
+// Self Assessment Modal Component
+const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
+  const [assessment, setAssessment] = useState({
+    enjoyedReading: 1,
+    readUsefulBooks: 1,
+    madeNewFriends: 1,
+    conversationsImprovedUnderstanding: 1,
+    expressedOpinionFreely: 1,
+    increasedSelfConfidence: 1,
+    wouldEncourageClassmates: 1,
+    willJoinNextYear: 1
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [validationError, setValidationError] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const assessmentLabels = {
+    enjoyedReading: 'استمتعت بالقراءة',
+    readUsefulBooks: 'قراءة كتب مفيدة',
+    madeNewFriends: 'تكوين صداقات جديدة',
+    conversationsImprovedUnderstanding: 'المحادثات حسنت الفهم',
+    expressedOpinionFreely: 'التعبير عن الرأي بحرية',
+    increasedSelfConfidence: 'زيادة الثقة بالنفس',
+    wouldEncourageClassmates: 'تشجيع الزملاء',
+    willJoinNextYear: 'المشاركة في العام القادم'
+  };
+
+  const handleRatingChange = (field, value) => {
+    setAssessment(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setSubmitting(true);
+      setValidationError(null);
+      setErrorMessage('');
+      
+      const assessmentData = {
+        enjoyedReading: assessment.enjoyedReading,
+        readUsefulBooks: assessment.readUsefulBooks,
+        madeNewFriends: assessment.madeNewFriends,
+        conversationsImprovedUnderstanding: assessment.conversationsImprovedUnderstanding,
+        expressedOpinionFreely: assessment.expressedOpinionFreely,
+        increasedSelfConfidence: assessment.increasedSelfConfidence,
+        wouldEncourageClassmates: assessment.wouldEncourageClassmates,
+        willJoinNextYear: assessment.willJoinNextYear
+      };
+
+      await onSubmit(assessmentData);
+    } catch (error) {
+      console.error('Error submitting self-assessment:', error);
+      
+      // Extract and display specific error message
+      const errorDetails = error.response?.data?.message || 
+                           error.message || 
+                           'حدث خطأ غير متوقع أثناء إرسال التقييم';
+      
+      // Show detailed error message
+      setErrorMessage(errorDetails);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (showSuccessPopup) {
+    return (
+      <div className="success-popup">
+        <div className="success-popup-content">
+          <FaCheckCircle className="success-icon" />
+          <h2 className='text-light'>تم إرسال تقييمك بنجاح!</h2>
+          <p className='text-light'>شكراً لك على مشاركة رأيك</p>
+          <button onClick={() => {
+            setShowSuccessPopup(false);
+            onClose();
+          }}>
+            إغلاق
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="self-assessment-modal">
+      <div className="modal-content">
+        <h2>التقييم الذاتي لكتاب {book.title}</h2>
+        
+        {Object.keys(assessment).map(field => (
+          <div key={field} className="assessment-item">
+            <label>{assessmentLabels[field]}</label>
+            <div className="star-rating">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <FaStar 
+                  key={star} 
+                  color={star <= assessment[field] ? "#ffc107" : "#e4e5e9"}
+                  onClick={() => handleRatingChange(field, star)}
+                  className="star-icon"
+                />
+              ))}
+            </div>
+            {validationError && validationError[field] && (
+              <p className="error-message">{validationError[field]}</p>
+            )}
+          </div>
+        ))}
+
+        <div className="modal-actions">
+          <button 
+            onClick={handleSubmit} 
+            disabled={submitting}
+            className={`submit-btn ${submitting ? 'submitting' : ''}`}
+          >
+            {submitting ? (
+              <>
+                <FaSpinner className="spinner" /> جاري الإرسال...
+              </>
+            ) : (
+              'إرسال التقييم'
+            )}
+          </button>
+          <button onClick={onClose} disabled={submitting} className="cancel-btn">
+            إلغاء
+          </button>
+        </div>
+        
+        {errorMessage && (
+          <div className="error-message">
+            <p>{errorMessage}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default function LibraryStudent() {
-  const { fetchBooksBySchoolCode, submitBookRating } = useContext(DataContext);
+  const { fetchBooksBySchoolCode, submitBookRating, submitSelfAssessment } = useContext(DataContext);
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState(null);
+  const [selectedBookForSelfAssessment, setSelectedBookForSelfAssessment] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [popupMessage, setPopupMessage] = useState(null);
+  const [popupType, setPopupType] = useState(null);
+
+  const showPopup = (message, type = 'success') => {
+    setPopupMessage(message);
+    setPopupType(type);
+    setTimeout(() => {
+      setPopupMessage(null);
+      setPopupType(null);
+    }, 3000);
+  };
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -418,8 +569,8 @@ export default function LibraryStudent() {
         bookRating: Math.max(1, reviewData.rating || 0)
       });
       
-      // Show success alert
-      alert('تم إرسال تقييمك بنجاح! شكراً لك على مشاركة رأيك.');
+      // Show success popup
+      showPopup('تم إرسال تقييمك بنجاح! شكراً لك على مشاركة رأيك.');
       
       // Optional: Show success message or update UI
       console.log('Book rating submitted successfully:', response);
@@ -431,8 +582,46 @@ export default function LibraryStudent() {
       }, 2000);
     } catch (error) {
       console.error('Failed to submit book rating:', error);
-      // Show error alert
-      alert('حدث خطأ أثناء إرسال التقييم. يرجى المحاولة مرة أخرى.');
+      // Show error popup
+      showPopup('حدث خطأ أثناء إرسال التقييم. يرجى المحاولة مرة أخرى.', 'error');
+      setSubmitting(false);
+    }
+  };
+
+  const handleSelfAssessment = async (book, assessmentData) => {
+    try {
+      setSubmitting(true);
+      
+      // Validate and adjust assessment data
+      const validatedAssessmentData = Object.keys(assessmentData).reduce((acc, key) => {
+        // Ensure each value is at least 1 and at most 5
+        acc[key] = Math.min(5, Math.max(1, assessmentData[key]));
+        return acc;
+      }, {});
+      
+      const response = await submitSelfAssessment(book._id, validatedAssessmentData);
+      
+      // Show success popup
+      showPopup('تم إرسال التقييم الذاتي بنجاح! شكراً لك على مشاركة رأيك.');
+      
+      // Optional: Show success message or update UI
+      console.log('Self assessment submitted successfully:', response);
+      
+      // Add 2-second delay before closing modal
+      setTimeout(() => {
+        setSubmitting(false);
+        setSelectedBookForSelfAssessment(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to submit self assessment:', error);
+      
+      // Extract detailed error message
+      const errorMessage = error.response?.data?.message || 
+                           error.message || 
+                           'حدث خطأ أثناء إرسال التقييم الذاتي. يرجى المحاولة مرة أخرى.';
+      
+      // Show error popup with detailed message
+      showPopup(errorMessage, 'error');
       setSubmitting(false);
     }
   };
@@ -465,21 +654,19 @@ export default function LibraryStudent() {
               <p><strong>الرسام:</strong> {book.illustrator}</p>
               <p><strong>عدد الصفحات:</strong> {book.numberOfPages}</p>
               <p><strong>رمز المدرسة:</strong> {book.schoolCode}</p>
-              <p><strong>المعلم:</strong> {book.teacher.name}</p>
+              <p><strong>تاريخ المناقشة:</strong> {book.Discussiondate ? new Date(book.Discussiondate).toLocaleDateString('ar-EG', { day: 'numeric', month: 'numeric', year: 'numeric' }) : 'غير محدد'} </p>
               <div className="book-actions">
-                <a 
-                  href={book.bookLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="book-link-btn text-decoration-none"
-                >
-                  <FaBook /> رابط الكتاب
-                </a>
                 <button 
                   onClick={() => setSelectedBook(book)} 
-                  className="rate-book-btn"
+                  className="btn btn-success"
                 >
-                  قيّم الكتاب
+                  بطاقة تقييم الكتاب
+                </button>
+                <button 
+                  onClick={() => setSelectedBookForSelfAssessment(book)} 
+                  className="btn btn-primary"
+                >
+                  التقييم الذاتي للطالب
                 </button>
               </div>
             </div>
@@ -487,12 +674,25 @@ export default function LibraryStudent() {
         ))}
       </div>
 
+      {popupMessage && (
+        <div className={`popup ${popupType === 'error' ? 'error' : 'success'}`}>
+          <p>{popupMessage}</p>
+        </div>
+      )}
+
       {selectedBook && (
         <BookRatingModal 
           book={selectedBook} 
           onClose={() => setSelectedBook(null)}
           onSubmit={(reviewData) => handleBookRating(selectedBook, reviewData)}
           submitting={submitting}
+        />
+      )}
+      {selectedBookForSelfAssessment && (
+        <SelfAssessmentModal 
+          book={selectedBookForSelfAssessment} 
+          onClose={() => setSelectedBookForSelfAssessment(null)}
+          onSubmit={(assessmentData) => handleSelfAssessment(selectedBookForSelfAssessment, assessmentData)}
         />
       )}
     </div>

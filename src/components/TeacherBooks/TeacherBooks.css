@@ -1,0 +1,52 @@
+.rating-table {
+  width: 200%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.rating-table thead {
+  background-color: #3498db;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.rating-table thead th {
+  vertical-align: middle;
+  text-align: center;
+  padding: 15px;
+}
+
+.rating-table tbody tr {
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+  margin: 10px 0;
+}
+
+.rating-table tbody tr:hover {
+  background-color: #e9ecef;
+}
+
+.rating-table td, .rating-table th {
+  text-align: center;
+  padding: 15px;
+  vertical-align: middle;
+}
+
+.rating-table .form-select {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.rating-table .form-select:last-child {
+  margin-bottom: 0;
+}
+
+.rating-modal .modal-body {
+  max-height: 90vh;
+  overflow-x: auto;
+  overflow-y: auto;
+}

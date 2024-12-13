@@ -192,38 +192,51 @@ export default function DataContextFunction({ children }) {
   };
 
   // Student Self Assessment API Method
-  const submitStudentSelfAssessment = async (assessmentData) => {
+  const submitSelfAssessment = async (bookId, assessmentData) => {
     try {
-      // Validate assessment data before sending
-      if (!assessmentData.studentId) {
-        throw new Error('Student ID is required');
-      }
+      const token = localStorage.getItem('token');
+      const decodedToken = jwtDecode(token);
+      const studentId = decodedToken.id;
+
+      // Ensure all fields are present and have a value
+      const selfAssessmentPayload = {
+        studentId: studentId,
+        bookId: bookId,
+        enjoyedReading: assessmentData.enjoyedReading || 0,
+        readUsefulBooks: assessmentData.readUsefulBooks || 0,
+        madeNewFriends: assessmentData.madeNewFriends || 0,
+        conversationsImprovedUnderstanding: assessmentData.conversationsImprovedUnderstanding || 0,
+        expressedOpinionFreely: assessmentData.expressedOpinionFreely || 0,
+        increasedSelfConfidence: assessmentData.increasedSelfConfidence || 0,
+        wouldEncourageClassmates: assessmentData.wouldEncourageClassmates || 0,
+        willJoinNextYear: assessmentData.willJoinNextYear || 0
+      };
 
       const response = await axios.post(
-        'https://school-book-clubs-backend.vercel.app/api/StudentSelfAssessment/create', 
-        assessmentData
+        `https://school-book-clubs-backend.vercel.app/api/StudentSelfAssessment/create`, 
+        selfAssessmentPayload,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
       );
-      return response.data;
-    } catch (error) {
-      // Log detailed error information
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers
-      });
-
-      // Throw a more informative error
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        throw new Error(error.response.data.message || 'Failed to submit self assessment');
-      } else if (error.request) {
-        // The request was made but no response was received
-        throw new Error('No response received from server');
+      
+      // Check if response indicates success
+      if (response.data && response.data.success) {
+        return {
+          success: true,
+          message: response.data.message || 'تم إرسال التقييم بنجاح'
+        };
       } else {
-        // Something happened in setting up the request
-        throw new Error('Error setting up the request');
+        throw new Error(response.data.message || 'فشل إرسال التقييم');
       }
+    } catch (error) {
+      console.error('Error submitting student self-assessment:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || error.message || 'حدث خطأ أثناء إرسال التقييم'
+      };
     }
   };
 
@@ -280,7 +293,7 @@ export default function DataContextFunction({ children }) {
         rateStudent,
         fetchBooksBySchoolCode,
         submitBookRating,
-        submitStudentSelfAssessment,
+        submitSelfAssessment,
         submitParentAssessment
       }}
     >

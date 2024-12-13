@@ -18,7 +18,7 @@ export default function AddBooks() {
       .positive('عدد الصفحات يجب أن يكون رقمًا موجبًا')
       .integer('عدد الصفحات يجب أن يكون رقمًا صحيحًا')
       .nullable(),
-    bookLink: Yup.string().url('رابط الكتاب يجب أن يكون رابطًا صحيحًا').nullable(),
+      Discussiondate: Yup.date().required('تاريخ المناقشة'),
     bookImage: Yup.mixed().required('صورة الكتاب مطلوبة')
   });
 
@@ -33,7 +33,7 @@ export default function AddBooks() {
     formData.append('schoolCode', schoolCode);
     if (values.illustrator) formData.append('illustrator', values.illustrator);
     if (values.numberOfPages) formData.append('numberOfPages', values.numberOfPages);
-    if (values.bookLink) formData.append('bookLink', values.bookLink);
+    if (values.Discussiondate) formData.append('Discussiondate', values.Discussiondate);
     formData.append('bookImage', values.bookImage);
 
     try {
@@ -61,8 +61,9 @@ export default function AddBooks() {
           <Card className="shadow-lg">
             <Card.Body className="p-5">
               <h2 className="text-center mb-4">
-                <i className="fas fa-book-medical me-2"></i>
+                
                 إضافة كتاب جديد
+                <i className="fas fa-book-medical me-2"></i>
               </h2>
 
               <Formik
@@ -71,7 +72,7 @@ export default function AddBooks() {
                   author: '',
                   illustrator: '',
                   numberOfPages: '',
-                  bookLink: '',
+                  Discussiondate: '',
                   bookImage: null
                 }}
                 validationSchema={bookValidationSchema}
@@ -145,14 +146,14 @@ export default function AddBooks() {
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                      <Form.Label>رابط الكتاب</Form.Label>
+                      <Form.Label>تاريخ المناقشة</Form.Label>
                       <Form.Control
-                        type="url"
-                        name="bookLink"
-                        value={values.bookLink}
+                        type="date"
+                        name="Discussiondate"
+                        value={values.Discussiondate}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        isInvalid={touched.bookLink && errors.bookLink}
+                        isInvalid={touched.Discussiondate && errors.Discussiondate}
                       />
                       <Form.Control.Feedback type="invalid">
                         {errors.bookLink}
@@ -198,7 +199,7 @@ export default function AddBooks() {
         onHide={() => setShowSuccessModal(false)}
         centered
       >
-        <Modal.Header closeButton>
+        <Modal.Header >
           <Modal.Title>نتيجة العملية</Modal.Title>
         </Modal.Header>
         <Modal.Body className="text-center">

@@ -1,0 +1,89 @@
+/* TeacherGuide Specific Styles */
+.teacher-guide {
+  background-color: #F8F9FA;
+}
+
+.teacher-guide-container {
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.teacher-guide-card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.teacher-guide-header {
+  margin-bottom: 2rem;
+}
+
+.teacher-guide-header h1 {
+  color: #2C3E50;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.teacher-guide-header h2 {
+  color: #34495E;
+  font-weight: 600;
+}
+
+.teacher-guide-section {
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.teacher-guide-section:hover {
+  transform: scale(1.02);
+}
+
+.teacher-guide-section-content {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  padding: 1.5rem;
+}
+
+.teacher-guide-section-title {
+  color: #2980B9;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.teacher-guide-text {
+  color: #2C3E50;
+  line-height: 1.6;
+}
+
+
+.teacher-guide-list {
+  list-style-type: disc;
+  padding-right: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.teacher-guide-list li {
+  margin-bottom: 0.5rem;
+  color: #2C3E50;
+}
+
+.teacher-guide-list li strong {
+  color: #2980B9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .teacher-guide-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .teacher-guide-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .teacher-guide-section-content {
+    padding: 1rem;
+  }
+}

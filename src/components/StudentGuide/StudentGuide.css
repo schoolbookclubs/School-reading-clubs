@@ -1,0 +1,85 @@
+.student-guide {
+  direction: rtl;
+  font-family: 'Tajawal', sans-serif;
+  background-color: #f4f6f9;
+  padding: 2rem 0;
+}
+
+.guide-header {
+  color: #2c3e50;
+  margin-bottom: 2rem;
+}
+
+.guide-header h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2980b9;
+}
+
+.guide-header h2 {
+  font-size: 1.8rem;
+  color: #3498db;
+}
+
+.full-introduction-card {
+  background-color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.full-introduction-card .card-title {
+  color: #2980b9;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+}
+
+.full-introduction-card .card-text {
+  line-height: 1.8;
+  color: #34495e;
+}
+
+.benefits-list {
+  list-style-type: disc;
+  padding-right: 30px;
+  margin-bottom: 20px;
+}
+
+.benefits-list li {
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.quote-section {
+  background-color: #ecf0f1;
+  padding: 2rem;
+  border-radius: 10px;
+  margin-top: 2rem;
+}
+
+.quote-section blockquote {
+  font-style: italic;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.quote-section blockquote::before,
+.quote-section blockquote::after {
+  content: '"';
+  color: #3498db;
+}
+
+@media (max-width: 768px) {
+  .guide-header h1 {
+    font-size: 2rem;
+  }
+
+  .guide-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .full-introduction-card .card-title {
+    font-size: 1.3rem;
+  }
+}

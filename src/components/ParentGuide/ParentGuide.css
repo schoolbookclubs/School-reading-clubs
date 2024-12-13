@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap');
+
+.parent-guide-container {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  min-height: 100vh;
+  padding: 50px 0;
+  font-family: 'Tajawal', sans-serif;
+  direction: rtl;
+}
+
+.parent-guide-content {
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.guide-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.guide-header h1 {
+  font-size: 2.5rem;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.header-underline {
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(to right, #ffa94d, #ff6b6b);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+.guide-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.guide-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.guide-section h2 {
+  color: #4a4a4a;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ffa94d;
+  padding-bottom: 10px;
+}
+
+.guide-section p, 
+.guide-section ul {
+  color: #666;
+  line-height: 1.8;
+  text-align: justify;
+}
+
+.guide-section ul {
+  list-style-type: disc;
+  padding-right: 30px;
+}
+
+.guide-section ul li {
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.guide-section ul li::before {
+  content: '•';
+  color: #ffa94d;
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-right: -1em;
+}
+
+.wisdom-section {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  padding: 2rem;
+  border-radius: 15px;
+  margin-top: 2rem;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.wisdom-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.wisdom-quote {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  line-height: 1.6;
+  font-style: italic;
+  direction: rtl;
+  text-align: center;
+  position: relative;
+  padding: 1rem;
+  background-color: rgba(255,255,255,0.7);
+  border-radius: 10px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .parent-guide-content {
+    margin: 0 20px;
+    padding: 20px;
+  }
+
+  .guide-header h1 {
+    font-size: 2rem;
+  }
+
+  .guide-section h2 {
+    font-size: 1.5rem;
+  }
+}

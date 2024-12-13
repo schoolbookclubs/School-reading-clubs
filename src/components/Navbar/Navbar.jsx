@@ -20,8 +20,10 @@ const MainNavbar = () => {
           <>
             <Nav.Link as={Link} to="/dashboard">لوحة التحكم</Nav.Link>
             <Nav.Link as={Link} to="/ProfileStudent">الملف الشخصي</Nav.Link>
-            <Nav.Link as={Link} to="/LibraryStudent">الكتب</Nav.Link>
-            <Nav.Link as={Link} to="/Selfassessment">التقييم الذاتي</Nav.Link>
+            <Nav.Link as={Link} to="/LibraryStudent">الكتب والتقييم</Nav.Link>
+            <Nav.Link as={Link} to="/StudentBag">حقيبة القارئ</Nav.Link>
+            <Nav.Link as={Link} to="/StudentGuide">دليل الطالب</Nav.Link>
+            <Nav.Link as={Link} to="/ReadingClubEvaluation">تقييم نادي القراءة</Nav.Link>
           </>
         );
       case 'معلم':
@@ -29,8 +31,8 @@ const MainNavbar = () => {
           <>
             <Nav.Link as={Link} to="/dashboard" className=''>الصفحة الرئيسية</Nav.Link>
             <Nav.Link as={Link} to="/books">اضافة كتاب</Nav.Link>
-            <Nav.Link as={Link} to="/Teacherbooks">الكتب </Nav.Link>
-            <Nav.Link as={Link} to="/StudentsTeacher">تقييم الطلاب</Nav.Link>
+            <Nav.Link as={Link} to="/Teacherbooks">الكتب و التقييم</Nav.Link>
+            <Nav.Link as={Link} to="/TeacherGuide">دليل المعلم</Nav.Link>
           </>
         );
       case 'مشرف':
@@ -47,6 +49,7 @@ const MainNavbar = () => {
             <Nav.Link as={Link} to="/dashboard">لوحة التحكم</Nav.Link>
             <Nav.Link as={Link} to="/Parentprofile">بياناتي الشخصية</Nav.Link>
             <Nav.Link as={Link} to="/Parentassessment">تقييم ولي الامر</Nav.Link>
+            <Nav.Link as={Link} to="/ParentGuide">دليل ولي الامر</Nav.Link>
           </>
         );
       default:

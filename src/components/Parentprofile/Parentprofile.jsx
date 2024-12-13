@@ -10,7 +10,8 @@ const Parentprofile = () => {
     email: '',
     name: '',
     role: '',
-    studentCode: ''
+    studentCode: '',
+    phone: ''
   });
 
   const [showEditModal, setShowEditModal] = useState(false);
@@ -28,7 +29,8 @@ const Parentprofile = () => {
           email: decodedToken.email,
           name: decodedToken.name,
           role: decodedToken.role,
-          studentCode: decodedToken.studentCode || 'غير محدد'
+          studentCode: decodedToken.studentCode || 'غير محدد',
+          phone: decodedToken.phone || 'غير محدد'
         });
       } catch (error) {
         console.error('Error decoding token:', error);
@@ -95,6 +97,10 @@ const Parentprofile = () => {
                     <strong>كود الطالب:</strong>
                     <p>{userData.studentCode}</p>
                   </Col>
+                  <Col md={6} className="mb-3">
+                    <strong>رقم الهاتف:</strong>
+                    <p>{userData.phone}</p>
+                  </Col>
                 </Row>
               </Card.Body>
               
@@ -123,6 +129,14 @@ const Parentprofile = () => {
                   type="text" 
                   value={editedData.name || ''}
                   onChange={(e) => setEditedData(prev => ({...prev, name: e.target.value}))}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>رقم الهاتف</Form.Label>
+                <Form.Control 
+                  type="text" 
+                  value={editedData.phone || ''}
+                  onChange={(e) => setEditedData(prev => ({...prev, phone: e.target.value}))}
                 />
               </Form.Group>
             </Form>

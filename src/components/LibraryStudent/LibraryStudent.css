@@ -1,4 +1,3 @@
-/* LibraryStudent.css */
 .library-student-container {
   direction: rtl;
   max-width: 1200px;
@@ -57,36 +56,38 @@
 .book-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 15px;
+  gap: 15px;
+  margin-top: 10px;
 }
 
-.book-link-btn, .rate-book-btn {
+.rate-book-btn, .self-assessment-btn {
+  flex: 1;
   padding: 10px 15px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.book-link-btn {
-  background-color: #3498db;
-  color: white;
+  transition: all 0.3s ease;
+  text-align: center;
 }
 
 .rate-book-btn {
-  background-color: #2ecc71;
+  background-color: #4CAF50;
   color: white;
 }
 
-.book-link-btn:hover {
-  background-color: #2980b9;
+.self-assessment-btn {
+  background-color: #2196F3;
+  color: white;
 }
 
 .rate-book-btn:hover {
-  background-color: #27ae60;
+  background-color: #45a049;
+}
+
+.self-assessment-btn:hover {
+  background-color: #1976D2;
 }
 
 /* Loading Spinner */
@@ -334,13 +335,13 @@
 }
 
 .success-popup-content h2 {
-  color: #2c3e50;
+  color: #fff;
   margin-bottom: 15px;
   font-size: 1.5rem;
 }
 
 .success-popup-content p {
-  color: #7f8c8d;
+  color: #fff;
   margin-bottom: 20px;
 }
 
@@ -468,4 +469,128 @@
 .date-validation-info p::before {
   content: '💡';
   margin-left: 10px;
+}
+
+/* Self-Assessment Modal */
+.self-assessment-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  direction: rtl;
+}
+
+.self-assessment-modal .modal-content {
+  background-color: white;
+  border-radius: 15px;
+  padding: 30px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.self-assessment-modal h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.assessment-category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.assessment-category label {
+  margin-bottom: 10px;
+  color: #555;
+  font-weight: bold;
+}
+
+.self-assessment-modal .star-rating {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.self-assessment-modal .star-icon {
+  font-size: 30px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.self-assessment-modal .star-icon:hover {
+  transform: scale(1.2);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.submit-btn, .cancel-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.submit-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.submit-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.popup {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 15px 30px;
+  border-radius: 8px;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+.popup.success {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.popup.error {
+  background-color: #f44336;
+  color: white;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }

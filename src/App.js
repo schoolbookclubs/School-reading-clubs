@@ -23,12 +23,16 @@ import LoginSupervisor from './components/LoginSupervisor/LoginSupervisor.jsx';
 import Dashboard from './components/Dashboard/Dashboard.jsx';
 import AddBooks from './components/AddBooks/AddBooks.jsx';
 import TeacherBooks from './components/TeacherBooks/TeacherBooks.jsx';
-import StudentsTeacher from './components/StudentsTeacher/StudentsTeacher.jsx';
 import ProfileStudent from './components/ProfileStudent/ProfileStudent.jsx';
 import LibraryStudent from './components/LibraryStudent/LibraryStudent.jsx';
-import Selfassessment from './components/Selfassessment/Selfassessment.jsx';
 import Parentprofile from './components/Parentprofile/Parentprofile.jsx';
 import Parentassessment from './components/Parentassessment/Parentassessment.jsx';
+import StudentBag from './components/StudentBag/StudentBag.jsx';
+import StudentGuide from './components/StudentGuide/StudentGuide.jsx';
+import TeacherGuide from './components/TeacherGuide/TeacherGuide.jsx';
+import ReadingClubEvaluation from './components/ReadingClubEvaluation/ReadingClubEvaluation.jsx';
+import ParentGuide from './components/ParentGuide/ParentGuide.jsx';
+
 export default function App() {
   const router = createBrowserRouter([
     {
@@ -41,7 +45,6 @@ export default function App() {
         { path: '/books', element: <Protected><AddBooks /></Protected> },
         { path: '/LibraryStudent', element: <Protected><LibraryStudent /></Protected> },
         { path: '/Teacherbooks', element: <Protected><TeacherBooks /></Protected> },
-        { path: '/Selfassessment', element: <Protected><Selfassessment /></Protected> },
         { 
           path: '/LoginStudent', 
           element: <RedirectIfAuthenticated><LoginStudent /></RedirectIfAuthenticated> 
@@ -95,21 +98,38 @@ export default function App() {
           element: <RedirectIfAuthenticated><ForgotPasswordsupervisor /></RedirectIfAuthenticated> 
         },
         { 
-          path: '/StudentsTeacher', 
-          element: <Protected><StudentsTeacher /></Protected> 
-        },
-        { 
           path: '/Parentprofile', 
           element: <Protected><Parentprofile /></Protected> 
         },
         { 
           path: '/Parentprofile', 
           element: <Protected><Parentprofile /></Protected> 
+        },
+        { 
+          path: '/ParentGuide', 
+          element: <Protected><ParentGuide /></Protected> 
+        },
+        {
+          path: '/ReadingClubEvaluation',
+          element: <Protected><ReadingClubEvaluation /></Protected>
         },
         { 
           path: '/Parentassessment', 
           element: <Protected><Parentassessment /></Protected> 
         },
+        { 
+          path: '/StudentBag', 
+          element: <Protected><StudentBag /></Protected> 
+        },
+        { 
+          path: '/StudentGuide', 
+          element: <Protected><StudentGuide /></Protected> 
+        },
+        { 
+          path: '/TeacherGuide', 
+          element: <Protected><TeacherGuide /></Protected> 
+        },
+
         { 
           path: '*', 
           element: <Notfoundpage /> 

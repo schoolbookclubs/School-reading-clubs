@@ -22,7 +22,9 @@ const SignupParent = () => {
       .required('كلمة المرور مطلوبة')
       .min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
     studentcodeinparent: Yup.string()
-      .required('رمز الطالب مطلوب')
+      .required('رمز الطالب مطلوب'),
+    phone: Yup.string()
+      .required('رقم الجوال مطلوب')
   });
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -32,6 +34,7 @@ const SignupParent = () => {
         email: values.email,
         password: values.password,
         studentcodeinparent: values.studentcodeinparent,
+        phone: values.phone,
         role: 'ولي أمر'
       });
 
@@ -75,7 +78,8 @@ const SignupParent = () => {
                   name: '',
                   email: '',
                   password: '',
-                  studentcodeinparent: ''
+                  studentcodeinparent: '',
+                  phone: ''
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -135,6 +139,20 @@ const SignupParent = () => {
                       />
                       <BootstrapForm.Control.Feedback type="invalid">
                         {errors.studentcodeinparent}
+                      </BootstrapForm.Control.Feedback>
+                    </BootstrapForm.Group>
+
+                    <BootstrapForm.Group className="mb-3">
+                      <BootstrapForm.Label className="fs-5">رقم الجوال</BootstrapForm.Label>
+                      <BootstrapForm.Control
+                        type="text"
+                        name="phone"
+                        value={values.phone}
+                        onChange={handleChange}
+                        isInvalid={touched.phone && errors.phone}
+                      />
+                      <BootstrapForm.Control.Feedback type="invalid">
+                        {errors.phone}
                       </BootstrapForm.Control.Feedback>
                     </BootstrapForm.Group>
 

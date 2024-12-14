@@ -1,85 +1,141 @@
-.student-guide {
-  direction: rtl;
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap');
+
+.parent-guide-container {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  min-height: 100vh;
+  padding: 50px 0;
   font-family: 'Tajawal', sans-serif;
-  background-color: #f4f6f9;
-  padding: 2rem 0;
+  direction: rtl;
+}
+
+.parent-guide-content {
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  animation: fadeIn 0.6s ease-out;
 }
 
 .guide-header {
-  color: #2c3e50;
-  margin-bottom: 2rem;
+  text-align: center;
+  margin-bottom: 40px;
 }
 
 .guide-header h1 {
   font-size: 2.5rem;
+  color: #333;
   font-weight: bold;
-  color: #2980b9;
+  margin-bottom: 15px;
 }
 
-.guide-header h2 {
+.header-underline {
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(to right, #ffa94d, #ff6b6b);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+.guide-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.guide-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.guide-section h2 {
+  color: #4a4a4a;
   font-size: 1.8rem;
-  color: #3498db;
-}
-
-.full-introduction-card {
-  background-color: #ffffff;
-  border: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.full-introduction-card .card-title {
-  color: #2980b9;
-  font-size: 1.5rem;
-  border-bottom: 2px solid #3498db;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ffa94d;
   padding-bottom: 10px;
 }
 
-.full-introduction-card .card-text {
+.guide-section p, 
+.guide-section ul {
+  color: #666;
   line-height: 1.8;
-  color: #34495e;
+  text-align: justify;
 }
 
-.benefits-list {
+.guide-section ul {
   list-style-type: disc;
   padding-right: 30px;
-  margin-bottom: 20px;
 }
 
-.benefits-list li {
+.guide-section ul li {
   margin-bottom: 10px;
-  color: #2c3e50;
+  position: relative;
 }
 
-.quote-section {
-  background-color: #ecf0f1;
+.guide-section ul li::before {
+  content: '•';
+  color: #ffa94d;
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-right: -1em;
+}
+
+.wisdom-section {
+  background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
   padding: 2rem;
-  border-radius: 10px;
+  border-radius: 15px;
   margin-top: 2rem;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  text-align: center;
 }
 
-.quote-section blockquote {
+.wisdom-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.wisdom-quote {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  line-height: 1.6;
   font-style: italic;
-  color: #2c3e50;
-  font-size: 1.2rem;
+  direction: rtl;
+  text-align: center;
+  position: relative;
+  padding: 1rem;
+  background-color: rgba(255,255,255,0.7);
+  border-radius: 10px;
 }
 
-.quote-section blockquote::before,
-.quote-section blockquote::after {
-  content: '"';
-  color: #3498db;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {
+  .parent-guide-content {
+    margin: 0 20px;
+    padding: 20px;
+  }
+
   .guide-header h1 {
     font-size: 2rem;
   }
 
-  .guide-header h2 {
+  .guide-section h2 {
     font-size: 1.5rem;
-  }
-
-  .full-introduction-card .card-title {
-    font-size: 1.3rem;
   }
 }

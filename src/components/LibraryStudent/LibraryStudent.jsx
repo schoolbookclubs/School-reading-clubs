@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { DataContext } from '../../context/context.js';
-import { FaStar, FaBook, FaSpinner, FaCheckCircle } from 'react-icons/fa';
+import { FaStar, FaBook, FaSpinner, FaCheckCircle, FaExclamationCircle, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
 import './LibraryStudent.css';
 
 // Success Popup Component
@@ -22,15 +22,63 @@ const SuccessPopup = ({ onClose }) => {
   );
 };
 
+// Improved API Response Modal Component
+const APIResponseModal = ({ type, message, onClose }) => {
+  const getModalStyles = () => {
+    switch(type) {
+      case 'success':
+        return {
+          icon: <FaCheckCircle className="text-success modal-icon" />,
+          title: 'نجاح العملية',
+          bgClass: 'bg-success-soft'
+        };
+      case 'error':
+        return {
+          icon: <FaExclamationCircle className="text-danger modal-icon" />,
+          title: 'خطأ في العملية',
+          bgClass: 'bg-danger-soft'
+        };
+      case 'warning':
+        return {
+          icon: <FaExclamationTriangle className="text-warning modal-icon" />,
+          title: 'تحذير',
+          bgClass: 'bg-warning-soft'
+        };
+      default:
+        return {
+          icon: <FaInfoCircle className="text-info modal-icon" />,
+          title: 'معلومات',
+          bgClass: 'bg-info-soft'
+        };
+    }
+  };
+
+  const { icon, title, bgClass } = getModalStyles();
+
+  return (
+    <div className="api-response-modal">
+      <div className={`api-response-content ${bgClass}`}>
+        <div className="api-response-header">
+          {icon}
+          <h3>{title}</h3>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+        <div className="api-response-body">
+          <p>{message}</p>
+        </div>
+        <div className="api-response-footer">
+          <button onClick={onClose} className="btn-confirm">
+            حسنًا
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState({
-    mainCharacters: '',
-    characterTraits: '',
-    keySummary: '',
-    favoriteQuotes: '',
-    hypotheticalChanges: '',
-    overallOpinion: '',
     recommendBook: '',
     authorStyle: '',
     keyIdeas: '',
@@ -43,7 +91,8 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
     readingEndDate: ''
   });
   const [errors, setErrors] = useState({});
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showAPIResponseModal, setShowAPIResponseModal] = useState(false);
+  const [apiResponse, setAPIResponse] = useState({ type: '', message: '' });
 
   const validateForm = () => {
     const newErrors = {};
@@ -53,46 +102,29 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
       newErrors.rating = 'يرجى اختيار تقييم للكتاب';
     }
 
-    // Check all text fields
-    Object.keys(review).forEach(key => {
-      if (!review[key].trim() && key !== 'readingStartDate' && key !== 'readingEndDate') {
-        newErrors[key] = 'هذا الحقل مطلوب';
+    // Validate required fields
+    const requiredFields = [
+      'recommendBook', 'authorStyle', 'keyIdeas', 
+      'likedIdeas', 'dislikedIdeas', 'memorableQuotes', 
+      'potentialAdditions', 'personalImpact',
+      'readingStartDate', 'readingEndDate'
+    ];
+
+    requiredFields.forEach(field => {
+      if (!review[field] || review[field].trim() === '') {
+        newErrors[field] = `هذا الحقل مطلوب`;
       }
     });
-
-    // Check recommendation
-    if (!review.recommendBook) {
-      newErrors.recommendBook = 'يرجى اختيار توصيتك للكتاب';
-    }
-
-    // Validate reading dates
-    if (!review.readingStartDate) {
-      newErrors.readingStartDate = 'يرجى إدخال تاريخ بدء القراءة';
-    }
-
-    if (!review.readingEndDate) {
-      newErrors.readingEndDate = 'يرجى إدخال تاريخ انتهاء القراءة';
-    }
-
-    // Ensure end date is after start date
-    if (review.readingStartDate && review.readingEndDate) {
-      const startDate = new Date(review.readingStartDate);
-      const endDate = new Date(review.readingEndDate);
-
-      if (endDate < startDate) {
-        newErrors.readingEndDate = 'يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء';
-      }
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRatingChange = (value) => {
-    setRating(value);
+  const handleRatingChange = (star) => {
+    setRating(star);
     // Clear rating error when a rating is selected
     if (errors.rating) {
-      const newErrors = {...errors};
+      const newErrors = { ...errors };
       delete newErrors.rating;
       setErrors(newErrors);
     }
@@ -105,113 +137,121 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
       [name]: value
     }));
 
-    // Clear specific field error when it's filled
+    // Clear specific field error when user starts typing
     if (errors[name]) {
-      const newErrors = {...errors};
+      const newErrors = { ...errors };
       delete newErrors[name];
       setErrors(newErrors);
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateForm()) {
-      onSubmit({
-        ...review,
-        rating
-      });
-      
-      // Add 2-second delay before showing success popup
-      setTimeout(() => {
-        setShowSuccessPopup(true);
-      }, 2000);
+      try {
+        // Sanitize and validate data before submission
+        const sanitizedReview = Object.keys(review).reduce((acc, key) => {
+          // Trim all string values and ensure they are not empty
+          const value = typeof review[key] === 'string' ? review[key].trim() : review[key];
+          
+          if (value === '') {
+            throw new Error(`Field ${key} cannot be empty`);
+          }
+          
+          acc[key] = value;
+          return acc;
+        }, {});
+
+        // Validate rating
+        if (rating < 1 || rating > 5) {
+          throw new Error('Invalid book rating');
+        }
+
+        const submissionData = {
+          ...sanitizedReview,
+          bookRating: rating  // Rename rating to bookRating to match backend
+        };
+
+        const response = await onSubmit(submissionData);
+        
+        // Only set success modal if submission is successful
+        setAPIResponse({ 
+          type: 'success', 
+          message: 'تم إرسال تقييمك بنجاح!' 
+        });
+        setShowAPIResponseModal(true);
+      } catch (error) {
+        console.error('Book rating submission error:', error);
+        
+        // More detailed error handling
+        const errorMessage = 
+          error.response?.data?.message || 
+          error.message || 
+          'حدث خطأ أثناء إرسال التقييم. يرجى المحاولة مرة أخرى.';
+
+        setAPIResponse({ 
+          type: 'error', 
+          message: errorMessage 
+        });
+        setShowAPIResponseModal(true);
+      }
     }
   };
 
-  const handleSuccessPopupClose = () => {
-    setShowSuccessPopup(false);
+  const handleAPIResponseModalClose = () => {
+    setShowAPIResponseModal(false);
     onClose();
   };
 
-  // If success popup is shown, render it
-  if (showSuccessPopup) {
-    return <SuccessPopup onClose={handleSuccessPopupClose} />;
+  // If API response modal is to be shown, render it
+  if (showAPIResponseModal) {
+    return (
+      <APIResponseModal 
+        type={apiResponse.type}
+        message={apiResponse.message}
+        onClose={handleAPIResponseModalClose}
+      />
+    );
   }
 
   return (
     <div className="book-rating-modal">
       <div className="modal-content">
-        <h2>تقييم كتاب {book.title}</h2>
-        <div className="star-rating">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <FaStar 
-              key={star} 
-              color={star <= rating ? "#ffc107" : "#e4e5e9"}
-              onClick={() => handleRatingChange(star)}
-              className="star-icon"
-            />
-          ))}
-          {errors.rating && <p className="error-message">{errors.rating}</p>}
+        <div className="reading-date">
+          <span>تاريخ القراءة: {new Date().toLocaleDateString('ar-EG', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}</span>
         </div>
+
+        <h2 className='py-3 text-center'>تقييم كتاب {book.title}</h2>
+
+        {/* التقييم العام */}
+       
+
         <div className="review-section">
-          <div className="review-group">
-            <h3>الشخصيات والأحداث</h3>
-            <textarea 
-              name="mainCharacters"
-              placeholder="الشخصيات الرئيسية"
-              value={review.mainCharacters}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.mainCharacters && <p className="error-message">{errors.mainCharacters}</p>}
-            
-            <textarea 
-              name="characterTraits"
-              placeholder="صفات الشخصيات"
-              value={review.characterTraits}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.characterTraits && <p className="error-message">{errors.characterTraits}</p>}
-            
-            <textarea 
-              name="keySummary"
-              placeholder="ملخص لأهم الأحداث"
-              value={review.keySummary}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.keySummary && <p className="error-message">{errors.keySummary}</p>}
-          </div>
+        
 
           <div className="review-group">
-            <h3>التقييم والرأي</h3>
-            <textarea 
-              name="favoriteQuotes"
-              placeholder="عبارات أعجبتني"
-              value={review.favoriteQuotes}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.favoriteQuotes && <p className="error-message">{errors.favoriteQuotes}</p>}
             
-            <textarea 
-              name="hypotheticalChanges"
-              placeholder="لو كنت أنا الكاتب لغيرت"
-              value={review.hypotheticalChanges}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.hypotheticalChanges && <p className="error-message">{errors.hypotheticalChanges}</p>}
-            
-            <textarea 
-              name="overallOpinion"
-              placeholder="رأيي بشكل عام في الكتاب"
-              value={review.overallOpinion}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.overallOpinion && <p className="error-message">{errors.overallOpinion}</p>}
-            
+          <div className="overall-rating">
+          <h3>التقييم العام</h3>
+          <div className="rating-display">
+            <span className="rating-number">{rating}/5</span>
+            <div className="star-rating">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <FaStar 
+                  key={star} 
+                  color={star <= rating ? "#ffc107" : "#e4e5e9"}
+                  onClick={() => handleRatingChange(star)}
+                  className="star-icon"
+                />
+              ))}
+            </div>
+          </div>
+          {errors.rating && <p className="error-message">{errors.rating}</p>}
+        </div>
+            {/* اوصي بقراءته */}
             <div className="recommend-section">
               <label>أوصي بقراءته:</label>
               <div>
@@ -237,76 +277,6 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
               {errors.recommendBook && <p className="error-message">{errors.recommendBook}</p>}
             </div>
           </div>
-
-          <div className="review-group">
-            <h3>أسلوب الكتابة والأفكار</h3>
-            <textarea 
-              name="authorStyle"
-              placeholder="رأيك بأسلوب الكاتب"
-              value={review.authorStyle}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.authorStyle && <p className="error-message">{errors.authorStyle}</p>}
-            
-            <textarea 
-              name="keyIdeas"
-              placeholder="ملخص لأهم الأفكار"
-              value={review.keyIdeas}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.keyIdeas && <p className="error-message">{errors.keyIdeas}</p>}
-            
-            <textarea 
-              name="likedIdeas"
-              placeholder="أفكار أعجبتك"
-              value={review.likedIdeas}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.likedIdeas && <p className="error-message">{errors.likedIdeas}</p>}
-            
-            <textarea 
-              name="dislikedIdeas"
-              placeholder="أفكار لم تعجبك"
-              value={review.dislikedIdeas}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.dislikedIdeas && <p className="error-message">{errors.dislikedIdeas}</p>}
-          </div>
-
-          <div className="review-group">
-            <h3>الاقتباسات والتأثير الشخصي</h3>
-            <textarea 
-              name="memorableQuotes"
-              placeholder="عبارات واقتباسات مميزة"
-              value={review.memorableQuotes}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.memorableQuotes && <p className="error-message">{errors.memorableQuotes}</p>}
-            
-            <textarea 
-              name="potentialAdditions"
-              placeholder="لو كنت أنا الكاتب ماذا كنت ستضيف أو تغيير؟"
-              value={review.potentialAdditions}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.potentialAdditions && <p className="error-message">{errors.potentialAdditions}</p>}
-            
-            <textarea 
-              name="personalImpact"
-              placeholder="أفكار أو أحداث لامستك شخصيًا"
-              value={review.personalImpact}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.personalImpact && <p className="error-message">{errors.personalImpact}</p>}
-          </div>
-
           <div className="review-group reading-dates-container">
             <h3>تاريخ القراءة</h3>
             <div className="date-input-group">
@@ -350,6 +320,76 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
               </div>
             )}
           </div>
+          <div className="review-group">
+            <h3>أسلوب الكتابة والأفكار</h3>
+            <textarea 
+              name="authorStyle"
+              placeholder="رأيك بأسلوب الكاتب"
+              value={review.authorStyle}
+              onChange={handleReviewChange}
+              required
+            />
+            {errors.authorStyle && <p className="error-message">{errors.authorStyle}</p>}
+            
+            <textarea 
+              name="keyIdeas"
+              placeholder="ملخص لأهم الأفكار والأحداث"
+              value={review.keyIdeas}
+              onChange={handleReviewChange}
+              required
+            />
+            {errors.keyIdeas && <p className="error-message">{errors.keyIdeas}</p>}
+            
+            <textarea 
+              name="likedIdeas"
+              placeholder="أفكار أعجبتك"
+              value={review.likedIdeas}
+              onChange={handleReviewChange}
+              required
+            />
+            {errors.likedIdeas && <p className="error-message">{errors.likedIdeas}</p>}
+            
+            <textarea 
+              name="dislikedIdeas"
+              placeholder="أفكار لم تعجبك"
+              value={review.dislikedIdeas}
+              onChange={handleReviewChange}
+              required
+            />
+            {errors.dislikedIdeas && <p className="error-message">{errors.dislikedIdeas}</p>}
+          </div>
+
+          <div className="review-group">
+            <h3>الاقتباسات والتأثير الشخصي</h3>
+            <textarea 
+              name="memorableQuotes"
+              placeholder="عبارات واقتباسات مميزة"
+              value={review.memorableQuotes}
+              onChange={handleReviewChange}
+              required
+            />
+            {errors.memorableQuotes && <p className="error-message">{errors.memorableQuotes}</p>}
+            
+            <textarea 
+              name="potentialAdditions"
+              placeholder="لو كنت أنا الكاتب ماذا كنت ستضيف أو تغيير في الكتاب ؟"
+              value={review.potentialAdditions}
+              onChange={handleReviewChange}
+              required
+            />
+            {errors.potentialAdditions && <p className="error-message">{errors.potentialAdditions}</p>}
+            
+            <textarea 
+              name="personalImpact"
+              placeholder="أفكار أو أحداث لامستك شخصيًا"
+              value={review.personalImpact}
+              onChange={handleReviewChange}
+              required
+            />
+            {errors.personalImpact && <p className="error-message">{errors.personalImpact}</p>}
+          </div>
+
+         
         </div>
         <div className="modal-actions">
           <button 
@@ -384,20 +424,22 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
     wouldEncourageClassmates: 1,
     willJoinNextYear: 1
   });
+
   const [submitting, setSubmitting] = useState(false);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showAPIResponseModal, setShowAPIResponseModal] = useState(false);
+  const [apiResponse, setAPIResponse] = useState({ type: '', message: '' });
   const [validationError, setValidationError] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const assessmentLabels = {
     enjoyedReading: 'استمتعت بالقراءة',
-    readUsefulBooks: 'قراءة كتب مفيدة',
-    madeNewFriends: 'تكوين صداقات جديدة',
-    conversationsImprovedUnderstanding: 'المحادثات حسنت الفهم',
-    expressedOpinionFreely: 'التعبير عن الرأي بحرية',
-    increasedSelfConfidence: 'زيادة الثقة بالنفس',
-    wouldEncourageClassmates: 'تشجيع الزملاء',
-    willJoinNextYear: 'المشاركة في العام القادم'
+    readUsefulBooks: 'قرأت كتبًا مفيدة',
+    madeNewFriends: 'تعرفت على أصدقاء جدد',
+    conversationsImprovedUnderstanding: 'زادت الحوارات من فهمي للكتب',
+    expressedOpinionFreely: 'أستطعت التعبير عن رأيي بحرية',
+    increasedSelfConfidence: 'زادت ثقتي بنفسي',
+    wouldEncourageClassmates: 'سوف أشجع زملائي على الانضمام لنادي قراءة',
+    willJoinNextYear: 'سوف أنضم لنادي القراءة السنة القادمة'
   };
 
   const handleRatingChange = (field, value) => {
@@ -413,50 +455,57 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
       setValidationError(null);
       setErrorMessage('');
       
-      const assessmentData = {
-        enjoyedReading: assessment.enjoyedReading,
-        readUsefulBooks: assessment.readUsefulBooks,
-        madeNewFriends: assessment.madeNewFriends,
-        conversationsImprovedUnderstanding: assessment.conversationsImprovedUnderstanding,
-        expressedOpinionFreely: assessment.expressedOpinionFreely,
-        increasedSelfConfidence: assessment.increasedSelfConfidence,
-        wouldEncourageClassmates: assessment.wouldEncourageClassmates,
-        willJoinNextYear: assessment.willJoinNextYear
-      };
+      // Convert numeric ratings to string and add validation
+      const assessmentData = Object.keys(assessment).reduce((acc, field) => {
+        const value = assessment[field];
+        
+        // Validate that value is a number and within expected range
+        if (typeof value !== 'number' || value < 1 || value > 5) {
+          throw new Error(`Invalid rating for ${field}: ${value}`);
+        }
+        
+        // Convert to string for potential backend requirements
+        acc[field] = value.toString();
+        return acc;
+      }, {
+        // Explicitly add these fields with empty values to satisfy backend validation
+        readingMotivation: '',
+        readingChallenges: '',
+        personalGrowth: '',
+        futureReadingPlans: ''
+      });
 
-      await onSubmit(assessmentData);
+      const response = await onSubmit(assessmentData);
+      
+      // Only set success modal if submission is successful
+      setAPIResponse({ 
+        type: 'success', 
+        message: 'تم إرسال التقييم الذاتي بنجاح!' 
+      });
+      setShowAPIResponseModal(true);
     } catch (error) {
       console.error('Error submitting self-assessment:', error);
       
-      // Extract and display specific error message
-      const errorDetails = error.response?.data?.message || 
-                           error.message || 
-                           'حدث خطأ غير متوقع أثناء إرسال التقييم';
+      // More robust error handling
+      const errorDetails = 
+        error.response?.data?.message || 
+        error.message || 
+        'حدث خطأ غير متوقع أثناء إرسال التقييم الذاتي. يرجى المحاولة مرة أخرى.';
       
-      // Show detailed error message
-      setErrorMessage(errorDetails);
+      setAPIResponse({ 
+        type: 'error', 
+        message: errorDetails 
+      });
+      setShowAPIResponseModal(true);
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (showSuccessPopup) {
-    return (
-      <div className="success-popup">
-        <div className="success-popup-content">
-          <FaCheckCircle className="success-icon" />
-          <h2 className='text-light'>تم إرسال تقييمك بنجاح!</h2>
-          <p className='text-light'>شكراً لك على مشاركة رأيك</p>
-          <button onClick={() => {
-            setShowSuccessPopup(false);
-            onClose();
-          }}>
-            إغلاق
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const handleAPIResponseModalClose = () => {
+    setShowAPIResponseModal(false);
+    onClose();
+  };
 
   return (
     <div className="self-assessment-modal">
@@ -512,119 +561,130 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
 };
 
 export default function LibraryStudent() {
-  const { fetchBooksBySchoolCode, submitBookRating, submitSelfAssessment } = useContext(DataContext);
+  const { 
+    fetchBooksBySchoolCode, 
+    submitBookRating, 
+    submitSelfAssessment 
+  } = useContext(DataContext);
+  
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState(null);
   const [selectedBookForSelfAssessment, setSelectedBookForSelfAssessment] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [popupMessage, setPopupMessage] = useState(null);
-  const [popupType, setPopupType] = useState(null);
+  const [showAPIResponseModal, setShowAPIResponseModal] = useState(false);
+  const [apiResponse, setAPIResponse] = useState({ type: '', message: '' });
 
-  const showPopup = (message, type = 'success') => {
-    setPopupMessage(message);
-    setPopupType(type);
-    setTimeout(() => {
-      setPopupMessage(null);
-      setPopupType(null);
-    }, 3000);
+  // Unified method to show API response
+  const showAPIResponse = (type, message) => {
+    setAPIResponse({ type, message });
+    setShowAPIResponseModal(true);
   };
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const booksData = await fetchBooksBySchoolCode();
-        setBooks(booksData.books || []);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching books:', error);
-        setLoading(false);
-      }
-    };
+  // Fetch books with improved error handling
+  const fetchBooks = async () => {
+    try {
+      setLoading(true);
+      const booksData = await fetchBooksBySchoolCode();
+      
+      // Ensure books is an array
+      const books = Array.isArray(booksData) 
+        ? booksData 
+        : booksData.books || booksData.data || [];
+      
+      setBooks(books);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error('Error fetching books:', error);
+      showAPIResponse('error', error.message || 'حدث خطأ أثناء جلب الكتب');
+      setBooks([]); // Ensure books is an empty array on error
+    }
+  };
 
-    fetchBooks();
-  }, [fetchBooksBySchoolCode]);
-
-  const handleBookRating = async (book, reviewData) => {
+  // Handle book rating submission
+  const handleBookRating = async (book, ratingData) => {
     try {
       setSubmitting(true);
       
-      const response = await submitBookRating(book._id, {
-        mainCharacters: reviewData.mainCharacters,
-        characterTraits: reviewData.characterTraits,
-        keySummary: reviewData.keySummary,
-        favoriteQuotes: reviewData.favoriteQuotes,
-        hypotheticalChanges: reviewData.hypotheticalChanges,
-        overallOpinion: reviewData.overallOpinion,
-        recommendBook: reviewData.recommendBook,
-        authorStyle: reviewData.authorStyle,
-        keyIdeas: reviewData.keyIdeas,
-        likedIdeas: reviewData.likedIdeas,
-        dislikedIdeas: reviewData.dislikedIdeas,
-        memorableQuotes: reviewData.memorableQuotes,
-        potentialAdditions: reviewData.potentialAdditions,
-        personalImpact: reviewData.personalImpact,
-        readingStartDate: reviewData.readingStartDate,
-        readingEndDate: reviewData.readingEndDate,
-        bookRating: Math.max(1, reviewData.rating || 0)
-      });
+      // Validate rating data
+      const requiredFields = [
+        'recommendBook', 'authorStyle', 'keyIdeas', 
+        'likedIdeas', 'dislikedIdeas', 'memorableQuotes', 
+        'potentialAdditions', 'personalImpact'
+      ];
+
+      const missingFields = requiredFields.filter(field => 
+        !ratingData[field] || ratingData[field].trim() === ''
+      );
+
+      if (ratingData.rating === 0) {
+        missingFields.push('التقييم');
+      }
+
+      if (missingFields.length > 0) {
+        throw new Error(`يرجى ملء جميع الحقول المطلوبة: ${missingFields.join(', ')}`);
+      }
+
+      await submitBookRating(book, ratingData);
       
-      // Show success popup
-      showPopup('تم إرسال تقييمك بنجاح! شكراً لك على مشاركة رأيك.');
-      
-      // Optional: Show success message or update UI
-      console.log('Book rating submitted successfully:', response);
-      
-      // Add 2-second delay before showing success popup
-      setTimeout(() => {
-        setSubmitting(false);
-        setSelectedBook(null);
-      }, 2000);
+      showAPIResponse('success', 'تم إرسال تقييم الكتاب بنجاح');
+      setSelectedBook(null);
     } catch (error) {
-      console.error('Failed to submit book rating:', error);
-      // Show error popup
-      showPopup('حدث خطأ أثناء إرسال التقييم. يرجى المحاولة مرة أخرى.', 'error');
+      showAPIResponse('error', error.message || 'حدث خطأ أثناء إرسال التقييم');
+      
+      // Optional: log the error for debugging
+      console.error('Book Rating Error:', error);
+    } finally {
       setSubmitting(false);
     }
   };
 
+  // Handle self-assessment submission
   const handleSelfAssessment = async (book, assessmentData) => {
     try {
       setSubmitting(true);
       
-      // Validate and adjust assessment data
-      const validatedAssessmentData = Object.keys(assessmentData).reduce((acc, key) => {
-        // Ensure each value is at least 1 and at most 5
-        acc[key] = Math.min(5, Math.max(1, assessmentData[key]));
-        return acc;
-      }, {});
+      // Create a new object with only the required fields for star ratings
+      const filteredAssessmentData = {
+        enjoyedReading: assessmentData.enjoyedReading,
+        readUsefulBooks: assessmentData.readUsefulBooks,
+        madeNewFriends: assessmentData.madeNewFriends,
+        conversationsImprovedUnderstanding: assessmentData.conversationsImprovedUnderstanding,
+        expressedOpinionFreely: assessmentData.expressedOpinionFreely,
+        increasedSelfConfidence: assessmentData.increasedSelfConfidence,
+        wouldEncourageClassmates: assessmentData.wouldEncourageClassmates,
+        willJoinNextYear: assessmentData.willJoinNextYear,
+        
+        // Add empty strings for fields causing validation issues
+        readingMotivation: '',
+        readingChallenges: '',
+        personalGrowth: '',
+        futureReadingPlans: ''
+      };
+
+      await submitSelfAssessment(book, filteredAssessmentData);
       
-      const response = await submitSelfAssessment(book._id, validatedAssessmentData);
-      
-      // Show success popup
-      showPopup('تم إرسال التقييم الذاتي بنجاح! شكراً لك على مشاركة رأيك.');
-      
-      // Optional: Show success message or update UI
-      console.log('Self assessment submitted successfully:', response);
-      
-      // Add 2-second delay before closing modal
-      setTimeout(() => {
-        setSubmitting(false);
-        setSelectedBookForSelfAssessment(null);
-      }, 2000);
+      showAPIResponse('success', 'تم إرسال التقييم الذاتي بنجاح');
+      setSelectedBookForSelfAssessment(null);
     } catch (error) {
-      console.error('Failed to submit self assessment:', error);
+      showAPIResponse('error', error.message || 'حدث خطأ أثناء إرسال التقييم الذاتي');
       
-      // Extract detailed error message
-      const errorMessage = error.response?.data?.message || 
-                           error.message || 
-                           'حدث خطأ أثناء إرسال التقييم الذاتي. يرجى المحاولة مرة أخرى.';
-      
-      // Show error popup with detailed message
-      showPopup(errorMessage, 'error');
+      // Optional: log the error for debugging
+      console.error('Self Assessment Error:', error);
+    } finally {
       setSubmitting(false);
     }
   };
+  // Close API response modal
+  const closeAPIResponseModal = () => {
+    setShowAPIResponseModal(false);
+    setAPIResponse({ type: '', message: '' });
+  };
+
+  useEffect(() => {
+    fetchBooks();
+  }, [fetchBooksBySchoolCode]);
 
   if (loading) {
     return (
@@ -674,12 +734,6 @@ export default function LibraryStudent() {
         ))}
       </div>
 
-      {popupMessage && (
-        <div className={`popup ${popupType === 'error' ? 'error' : 'success'}`}>
-          <p>{popupMessage}</p>
-        </div>
-      )}
-
       {selectedBook && (
         <BookRatingModal 
           book={selectedBook} 
@@ -695,6 +749,13 @@ export default function LibraryStudent() {
           onSubmit={(assessmentData) => handleSelfAssessment(selectedBookForSelfAssessment, assessmentData)}
         />
       )}
+      {showAPIResponseModal && (
+        <APIResponseModal 
+          type={apiResponse.type}
+          message={apiResponse.message}
+          onClose={closeAPIResponseModal}
+        />
+      )}
     </div>
   );
-}
+};

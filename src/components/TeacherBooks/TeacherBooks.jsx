@@ -110,16 +110,157 @@ export default function TeacherBooks() {
     }
   };
 
-  // State to manage individual student ratings
-  const [studentRatings, setStudentRatings] = useState({});
+  // Updated skills array with comprehensive rating options
+  const skills = [
+    {
+      id: 'attendance',
+      name: 'الحضور',
+      type: 'boolean'
+    },
+    {
+      id: 'completeReading',
+      name: 'يقرأ الكتاب قراءة تامة وواعية',
+      type: 'rating',
+      category: 'readingSkills'
+    },
+    {
+      id: 'deepUnderstanding',
+      name: 'تعكس مشاركاته فهمًا عميقًا',
+      type: 'rating',
+      category: 'readingSkills'
+    },
+    {
+      id: 'personalReflection',
+      name: 'يناقش تأثير النص على مواقفه ومعتقداته الشخصية',
+      type: 'rating',
+      category: 'readingSkills'
+    },
+    {
+      id: 'confidence',
+      name: 'يشارك بثقة ويعبر عن رأيه بحرية',
+      type: 'rating'
+    },
+    {
+      id: 'creativeIdeas',
+      name: 'يضيف أفكار وملاحظات خلاقة للنقاش',
+      type: 'rating',
+      category: 'criticalThinking'
+    },
+    {
+      id: 'connectingExperiences',
+      name: 'يربط بين النصوص المقروءة وتجارب الحياة الواقعية',
+      type: 'rating',
+      category: 'criticalThinking'
+    },
+    {
+      id: 'independentThinking',
+      name: 'يميز بين الأفكار وله رأي مستقل',
+      type: 'rating',
+      category: 'criticalThinking'
+    },
+    {
+      id: 'clearExpression',
+      name: 'يعبر عن أفكاره بلغة واضحة ودقيقة',
+      type: 'rating',
+      category: 'communicationSkills'
+    },
+    {
+      id: 'activeListening',
+      name: 'يصغي إلى أقرانه باهتمام',
+      type: 'rating',
+      category: 'communicationSkills'
+    },
+    {
+      id: 'constructiveFeedback',
+      name: 'يتفاعل مع آراء الآخرين بطرح أسئلة أو تقديم ردود بناءة',
+      type: 'rating',
+      category: 'communicationSkills'
+    },
+    {
+      id: 'activeParticipation',
+      name: 'يشارك بفعالية في النقاشات والأنشطة',
+      type: 'rating',
+      category: 'socialSkills'
+    },
+    {
+      id: 'respectingDiversity',
+      name: 'يحترم وجهات النظر المختلفة',
+      type: 'rating',
+      category: 'socialSkills'
+    },
+    {
+      id: 'buildingFriendships',
+      name: 'يكون صداقات بناءة مع أقرانه',
+      type: 'rating',
+      category: 'socialSkills'
+    },
+    {
+      id: 'collaboration',
+      name: 'يتعاون مع زملائه ويشجعهم ويعزز التفاعل الإيجابي',
+      type: 'rating',
+      category: 'generalBehavior'
+    }
+  ];
 
-  // Update rating for a specific student and criteria
-  const updateStudentRating = (studentId, category, subCategory, value) => {
-    setStudentRatings(prev => ({
-      ...prev,
-      [studentId]: {
-        ...(prev[studentId] || {}),
-        [subCategory]: value
+  // Initialize student ratings with default values
+  const initializeStudentRatings = () => {
+    const defaultRatings = {};
+    students.forEach(student => {
+      defaultRatings[student._id] = {
+        // Boolean skills
+        attendance: 'لا',
+
+        // Reading Skills
+        completeReading: 1,
+        deepUnderstanding: 1,
+        personalReflection: 1,
+
+        // Confidence
+        confidence: 1,
+
+        // Critical Thinking
+        creativeIdeas: 1,
+        connectingExperiences: 1,
+        independentThinking: 1,
+
+        // Communication Skills
+        clearExpression: 1,
+        activeListening: 1,
+        constructiveFeedback: 1,
+
+        // Social Skills
+        activeParticipation: 1,
+        respectingDiversity: 1,
+        buildingFriendships: 1,
+
+        // General Behavior
+        collaboration: 1
+      };
+    });
+    return defaultRatings;
+  };
+
+  // State for student ratings
+  const [studentRatings, setStudentRatings] = useState(initializeStudentRatings());
+
+  // Updated function to handle student ratings
+  const updateStudentRating = (studentId, skillId, value) => {
+    // Ensure we're using the correct student object
+    const student = students.find(s => s.id === studentId || s._id === studentId);
+    
+    if (!student) {
+      console.error('Student not found:', studentId);
+      return;
+    }
+
+    // Use the correct student ID
+    const correctStudentId = student._id || student.id;
+
+    setStudentRatings(prevRatings => ({
+      ...prevRatings,
+      [correctStudentId]: {
+        ...(prevRatings[correctStudentId] || {}),
+        [skillId]: value
       }
     }));
   };
@@ -128,394 +269,246 @@ export default function TeacherBooks() {
   const [isRatingSubmitting, setIsRatingSubmitting] = useState(false);
   const [showRatingSuccessModal, setShowRatingSuccessModal] = useState(false);
 
-  // Rating submission handler
-  const handleRatingSubmit = async (studentId, bookId) => {
-    const ratingData = {
-      book: bookId,
-      audience: studentRatings[studentId]?.audience || 'لا',
-      readingSkills: {
-        completeReading: studentRatings[studentId]?.completeReading || 1,
-        deepUnderstanding: studentRatings[studentId]?.deepUnderstanding || 1,
-        personalReflection: studentRatings[studentId]?.personalReflection || 1
-      },
-      confidence: studentRatings[studentId]?.confidence || 1,
-      criticalThinking: {
-        creativeIdeas: studentRatings[studentId]?.creativeIdeas || 1,
-        connectingExperiences: studentRatings[studentId]?.connectingExperiences || 1,
-        independentThinking: studentRatings[studentId]?.independentThinking || 1
-      },
-      communicationSkills: {
-        clearExpression: studentRatings[studentId]?.clearExpression || 1,
-        activeListening: studentRatings[studentId]?.activeListening || 1,
-        constructiveFeedback: studentRatings[studentId]?.constructiveFeedback || 1
-      },
-      socialSkills: {
-        activeParticipation: studentRatings[studentId]?.activeParticipation || 1,
-        respectingDiversity: studentRatings[studentId]?.respectingDiversity || 1,
-        buildingFriendships: studentRatings[studentId]?.buildingFriendships || 1
-      },
-      generalBehavior: {
-        collaboration: studentRatings[studentId]?.collaboration || 1
-      }
-    };
-
-    return await rateStudent(studentId, ratingData);
-  };
+  // State for handling submission result
+  const [submissionResult, setSubmissionResult] = useState({
+    show: false,
+    success: false,
+    message: ''
+  });
 
   // New function to submit all ratings
   const submitAllRatings = async () => {
     setIsRatingSubmitting(true);
+    
     try {
-      // Create an array of promises for all student ratings
-      const ratingPromises = students.map(student => 
-        handleRatingSubmit(student._id, selectedBook._id)
+      // Prepare ratings for all students
+      const allRatings = students.map(student => {
+        const studentRating = studentRatings[student._id] || {};
+        
+        return {
+          studentId: student._id,
+          bookId: selectedBook._id,
+          ratings: {
+            audience: studentRating.attendance || 'لا',
+            readingSkills: {
+              completeReading: studentRating.completeReading || 1,
+              deepUnderstanding: studentRating.deepUnderstanding || 1,
+              personalReflection: studentRating.personalReflection || 1
+            },
+            confidence: studentRating.confidence || 1,
+            criticalThinking: {
+              creativeIdeas: studentRating.creativeIdeas || 1,
+              connectingExperiences: studentRating.connectingExperiences || 1,
+              independentThinking: studentRating.independentThinking || 1
+            },
+            communicationSkills: {
+              clearExpression: studentRating.clearExpression || 1,
+              activeListening: studentRating.activeListening || 1,
+              constructiveFeedback: studentRating.constructiveFeedback || 1
+            },
+            socialSkills: {
+              activeParticipation: studentRating.activeParticipation || 1,
+              respectingDiversity: studentRating.respectingDiversity || 1,
+              buildingFriendships: studentRating.buildingFriendships || 1
+            },
+            generalBehavior: {
+              collaboration: studentRating.collaboration || 1
+            }
+          }
+        };
+      });
+
+      // Log ratings for debugging
+      console.log('Submitting Ratings:', JSON.stringify(allRatings, null, 2));
+
+      // Submit ratings for all students
+      const results = await Promise.all(
+        allRatings.map(rating => {
+          // Validate student ID before submission
+          if (!rating.studentId) {
+            console.error('Invalid student ID:', rating);
+            return Promise.resolve(false);
+          }
+          return rateStudent(rating.studentId, rating);
+        })
       );
 
-      // Wait for all ratings to be submitted
-      await Promise.all(ratingPromises);
+      // Check if all submissions were successful
+      const allSuccessful = results.every(result => result);
 
-      // Show success modal
-      setShowRatingSuccessModal(true);
+      // Set submission result
+      setSubmissionResult({
+        show: true,
+        success: allSuccessful,
+        message: allSuccessful 
+          ? 'تم تسجيل التقييمات بنجاح' 
+          : 'حدث خطأ أثناء تسجيل بعض التقييمات'
+      });
+
+      // Close modal if successful
+      if (allSuccessful) {
+        setShowRatingModal(false);
+      }
     } catch (error) {
       console.error('Error submitting ratings:', error);
-      alert('حدث خطأ أثناء تسجيل التقييمات');
+      
+      // Set error submission result
+      setSubmissionResult({
+        show: true,
+        success: false,
+        message: error.message || 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى'
+      });
     } finally {
       setIsRatingSubmitting(false);
     }
   };
 
-  // Rating Modal Component
-  const RatingModal = () => (
-    <>
+  // Submission Result Modal
+  const SubmissionResultModal = () => {
+    return (
       <Modal 
-        show={showRatingModal} 
-        onHide={() => setShowRatingModal(false)}
-        size="xxl"
-        fullscreen={true}
+        show={submissionResult.show} 
+        onHide={() => setSubmissionResult({ show: false, success: false, message: '' })}
         centered
-        className="rating-modal"
-        style={{ 
-          maxWidth: '99%', 
-          margin: '0 auto',
-          minWidth: '95%'
-        }}
+        size="lg"
       >
-        <Modal.Header  style={{ backgroundColor: '#f8f9fa' }}>
-          <Modal.Title className="w-100 text-center">
-            <h5 className="mb-0" style={{ color: '#2c3e50' }}>
-              تقييم المعلم اداء الطلاب في كتاب: {selectedBook?.title}
-            </h5>
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ 
-          backgroundColor: '#f4f6f7', 
-          maxHeight: '90vh', 
-          overflowY: 'auto',
-          overflowX: 'auto'
-        }}>
-          <div style={{ 
-            width: '100%', 
-            overflowX: 'auto', 
-            overflowY: 'auto',
-            maxHeight: '80vh'
-          }}>
-            <Table 
-              responsive 
-              bordered 
-              hover 
-              style={{ 
-                backgroundColor: 'white', 
-                width: '200%', 
-                tableLayout: 'fixed',
-                borderCollapse: 'separate',
-                borderSpacing: '0 10px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}
-              className="rating-table"
-            >
-              <thead style={{ 
-                backgroundColor: '#3498db', 
-                color: 'white',
-                position: 'sticky',
-                top: 0,
-                zIndex: 10
-              }}>
-                <tr style={{ textAlign: 'center' }}>
-                  <th style={{ width: '20%', padding: '20px', verticalAlign: 'middle' }}>اسم الطالب</th>
-                  <th style={{ width: '20%', padding: '20px', verticalAlign: 'middle' }}>الحضور</th>
-                  <th style={{ width: '20%', padding: '20px', verticalAlign: 'middle' }}>
-                    مهارات القراءة
-                    <div style={{ fontSize: '0.8em', fontWeight: 'normal' }}>
-                      <div>القراءة الكاملة</div>
-                      <div>الفهم العميق</div>
-                      <div>التأمل الشخصي</div>
-                    </div>
-                  </th>
-                  <th style={{ width: '20%', padding: '20px', verticalAlign: 'middle' }}>الثقة</th>
-                  <th style={{ width: '20%', padding: '20px', verticalAlign: 'middle' }}>
-                    التفكير النقدي
-                    <div style={{ fontSize: '0.8em', fontWeight: 'normal' }}>
-                      <div>الأفكار الإبداعية</div>
-                      <div>ربط التجارب</div>
-                      <div>التفكير المستقل</div>
-                    </div>
-                  </th>
-                  <th style={{ width: '20%', padding: '20px', verticalAlign: 'middle' }}>
-                    مهارات التواصل
-                    <div style={{ fontSize: '0.8em', fontWeight: 'normal' }}>
-                      <div>التعبير الواضح</div>
-                      <div>الاستماع الفعال</div>
-                      <div>التغذية الراجعة البناءة</div>
-                    </div>
-                  </th>
-                  <th style={{ width: '20%', padding: '20px', verticalAlign: 'middle' }}>
-                    المهارات الاجتماعية
-                    <div style={{ fontSize: '0.8em', fontWeight: 'normal' }}>
-                      <div>المشاركة الفعالة</div>
-                      <div>احترام التنوع</div>
-                      <div>بناء الصداقات</div>
-                    </div>
-                  </th>
-                  <th style={{ width: '20%', padding: '20px', verticalAlign: 'middle' }}>السلوك العام</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map(student => (
-                  <tr 
-                    key={student._id} 
-                    style={{ 
-                      backgroundColor: '#f8f9fa', 
-                      transition: 'background-color 0.3s ease',
-                      margin: '10px 0'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e9ecef'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
-                  >
-                    <td style={{ textAlign: 'center', padding: '15px', verticalAlign: 'middle' }}>
-                      {student.name}
-                    </td>
-                    <td style={{ textAlign: 'center', padding: '15px', verticalAlign: 'middle' }}>
-                      <Form.Select 
-                        size="sm" 
-                        value={studentRatings[student._id]?.audience || 'لا'}
-                        onChange={(e) => updateStudentRating(
-                          student._id, 
-                          'audience', 
-                          'audience', 
-                          e.target.value
-                        )}
-                      >
-                        <option value="نعم">نعم</option>
-                        <option value="لا">لا</option>
-                      </Form.Select>
-                    </td>
-                    <td style={{ textAlign: 'center', padding: '15px', verticalAlign: 'middle' }}>
-                      {['completeReading', 'deepUnderstanding', 'personalReflection'].map((subCategory) => (
-                        <Form.Select 
-                          key={subCategory}
-                          size="sm" 
-                          className="mb-2"
-                          value={studentRatings[student._id]?.[subCategory] || 1}
-                          onChange={(e) => updateStudentRating(
-                            student._id, 
-                            'readingSkills', 
-                            subCategory, 
-                            parseInt(e.target.value)
-                          )}
-                        >
-                          {[1, 2, 3, 4, 5].map((rating) => (
-                            <option key={rating} value={rating}>{rating}</option>
-                          ))}
-                        </Form.Select>
-                      ))}
-                    </td>
-                    <td style={{ textAlign: 'center', padding: '15px', verticalAlign: 'middle' }}>
-                      <Form.Select 
-                        size="sm" 
-                        value={studentRatings[student._id]?.confidence || 1}
-                        onChange={(e) => updateStudentRating(
-                          student._id, 
-                          'confidence', 
-                          'confidence', 
-                          parseInt(e.target.value)
-                        )}
-                      >
-                        {[1, 2, 3, 4, 5].map((rating) => (
-                          <option key={rating} value={rating}>{rating}</option>
-                        ))}
-                      </Form.Select>
-                    </td>
-                    <td style={{ textAlign: 'center', padding: '15px', verticalAlign: 'middle' }}>
-                      {['creativeIdeas', 'connectingExperiences', 'independentThinking'].map((subCategory) => (
-                        <Form.Select 
-                          key={subCategory}
-                          size="sm" 
-                          className="mb-2"
-                          value={studentRatings[student._id]?.[subCategory] || 1}
-                          onChange={(e) => updateStudentRating(
-                            student._id, 
-                            'criticalThinking', 
-                            subCategory, 
-                            parseInt(e.target.value)
-                          )}
-                        >
-                          {[1, 2, 3, 4, 5].map((rating) => (
-                            <option key={rating} value={rating}>{rating}</option>
-                          ))}
-                        </Form.Select>
-                      ))}
-                    </td>
-                    <td style={{ textAlign: 'center', padding: '15px', verticalAlign: 'middle' }}>
-                      {['clearExpression', 'activeListening', 'constructiveFeedback'].map((subCategory) => (
-                        <Form.Select 
-                          key={subCategory}
-                          size="sm" 
-                          className="mb-2"
-                          value={studentRatings[student._id]?.[subCategory] || 1}
-                          onChange={(e) => updateStudentRating(
-                            student._id, 
-                            'communicationSkills', 
-                            subCategory, 
-                            parseInt(e.target.value)
-                          )}
-                        >
-                          {[1, 2, 3, 4, 5].map((rating) => (
-                            <option key={rating} value={rating}>{rating}</option>
-                          ))}
-                        </Form.Select>
-                      ))}
-                    </td>
-                    <td style={{ textAlign: 'center', padding: '15px', verticalAlign: 'middle' }}>
-                      {['activeParticipation', 'respectingDiversity', 'buildingFriendships'].map((subCategory) => (
-                        <Form.Select 
-                          key={subCategory}
-                          size="sm" 
-                          className="mb-2"
-                          value={studentRatings[student._id]?.[subCategory] || 1}
-                          onChange={(e) => updateStudentRating(
-                            student._id, 
-                            'socialSkills', 
-                            subCategory, 
-                            parseInt(e.target.value)
-                          )}
-                        >
-                          {[1, 2, 3, 4, 5].map((rating) => (
-                            <option key={rating} value={rating}>{rating}</option>
-                          ))}
-                        </Form.Select>
-                      ))}
-                    </td>
-                    <td style={{ textAlign: 'center', padding: '15px', verticalAlign: 'middle' }}>
-                      <Form.Select 
-                        size="sm" 
-                        value={studentRatings[student._id]?.collaboration || 1}
-                        onChange={(e) => updateStudentRating(
-                          student._id, 
-                          'generalBehavior', 
-                          'collaboration', 
-                          parseInt(e.target.value)
-                        )}
-                      >
-                        {[1, 2, 3, 4, 5].map((rating) => (
-                          <option key={rating} value={rating}>{rating}</option>
-                        ))}
-                      </Form.Select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        </Modal.Body>
-        <Modal.Footer style={{ 
-          backgroundColor: '#f8f9fa', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center' 
-        }}>
-          <Button 
-            variant="secondary" 
-            onClick={() => setShowRatingModal(false)}
-            style={{ marginLeft: 'auto' }}
-            disabled={isRatingSubmitting}
-          >
-            إغلاق
-          </Button>
-          <Button 
-            variant="primary" 
-            onClick={submitAllRatings}
-            disabled={isRatingSubmitting}
+        <Modal.Body className="text-center p-5">
+          <div 
             style={{ 
-              marginRight: 'auto',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              backgroundColor: submissionResult.success ? '#2ecc71' : '#e74c3c', 
+              color: 'white', 
+              borderRadius: '50%', 
+              width: '150px', 
+              textAlign: 'center',
+              height: '150px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              margin: '0 auto 30px',
+              fontSize: '72px'
             }}
           >
-            {isRatingSubmitting ? (
-              <>
-                <Spinner 
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                  style={{ marginLeft: '10px' }}
-                />
-                جاري الرفع...
-              </>
-            ) : (
-              'رفع التقييمات'
-            )}
+            {submissionResult.success ? '✓' : '✗'}
+          </div>
+          <h2 style={{ 
+            color: submissionResult.success ? '#27ae60' : '#c0392b', 
+            marginBottom: '20px' ,
+            textAlign: 'center',
+          }}>
+            {submissionResult.success ? 'عملية ناجحة' : 'خطأ في العملية'}
+          </h2>
+          <p style={{ 
+            color: submissionResult.success ? '#2c3e50' : '#7f8c8d', 
+            fontSize: '18px',
+            marginBottom: '30px',
+            textAlign: 'center'
+          }}>
+            {submissionResult.message}
+          </p>
+          <Button 
+            variant={submissionResult.success ? 'success' : 'danger'}
+            onClick={() => setSubmissionResult({ show: false, success: false, message: '' })}
+            style={{ 
+              padding: '10px 30px', 
+              fontSize: '16px' ,
+              textAlign: 'center'
+            }}
+            className='mx-auto d-block'
+          >
+            {submissionResult.success ? 'إغلاق' : 'المحاولة مرة أخرى'}
           </Button>
-        </Modal.Footer>
+        </Modal.Body>
       </Modal>
-      
-      {/* Success Modal */}
-      <RatingSuccessModal />
-    </>
-  );
+    );
+  };
 
-  // Success Modal Component
-  const RatingSuccessModal = () => (
-    <Modal 
-      show={showRatingSuccessModal} 
-      onHide={() => {
-        setShowRatingSuccessModal(false);
-      }}
-      centered
-    >
-      <Modal.Body className="text-center p-5">
-        <div style={{ 
-          backgroundColor: '#2ecc71', 
-          color: 'white', 
-          borderRadius: '50%', 
-          width: '100px', 
-          height: '100px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          margin: '0 auto 20px',
-          fontSize: '48px'
-        }}>
-          ✓
-        </div>
-        <h3 style={{ color: '#2c3e50', marginBottom: '20px' }}>
-          تم رفع التقييمات بنجاح
-        </h3>
-        <p style={{ color: '#7f8c8d' }}>
-          تم تسجيل تقييمات الطلاب بنجاح في قاعدة البيانات
-        </p>
-        <Button 
-          variant="primary" 
-          onClick={() => setShowRatingSuccessModal(false)}
-          style={{ marginTop: '20px' }}
+  // Render rating modal with a traditional table
+  const renderRatingModal = () => {
+    return (
+      <>
+        <Modal 
+          show={showRatingModal} 
+          onHide={() => setShowRatingModal(false)} 
+          size="xl" 
+          centered 
+          dialogClassName="rating-modal"
         >
-          إغلاق
-        </Button>
-      </Modal.Body>
-    </Modal>
-  );
+          <Modal.Header  className="bg-primary text-white text-center">
+            <Modal.Title className='text-center'>تقييم أداء الطلاب</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="d-flex justify-content-center">
+            <div className="table-responsive" style={{width: '95%'}}>
+              <table className="table table-bordered table-striped text-center">
+                <thead className="thead-light">
+                  <tr>
+                    <th className="align-middle">المهارات</th>
+                    {students.map((student) => (
+                      <th key={student._id} className="align-middle">{student.name}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {skills.map((skill) => (
+                    <tr key={skill.id}>
+                      <td className="font-weight-bold text-right">{skill.name}</td>
+                      {students.map((student) => (
+                        <td key={student._id}>
+                          {skill.type === 'boolean' ? (
+                            <Form.Control
+                              as="select"
+                              size="sm"
+                              value={studentRatings[student._id]?.[skill.id] || 'لا'}
+                              onChange={(e) => updateStudentRating(student._id, skill.id, e.target.value)}
+                              className="text-center"
+                            >
+                              <option value="نعم">نعم</option>
+                              <option value="لا">لا</option>
+                            </Form.Control>
+                          ) : (
+                            <Form.Control
+                              as="select"
+                              size="sm"
+                              value={studentRatings[student._id]?.[skill.id] || 1}
+                              onChange={(e) => updateStudentRating(student._id, skill.id, e.target.value)}
+                              className="text-center"
+                            >
+                              {[1, 2, 3, 4, 5].map((rating) => (
+                                <option key={rating} value={rating}>
+                                  {rating}
+                                </option>
+                              ))}
+                            </Form.Control>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button 
+              variant="secondary" 
+              onClick={() => setShowRatingModal(false)}
+            >
+              إلغاء
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={submitAllRatings}
+              disabled={isRatingSubmitting}
+            >
+              {isRatingSubmitting ? <Spinner animation="border" size="sm" /> : 'حفظ التقييمات'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Submission Result Modal */}
+        <SubmissionResultModal />
+      </>
+    );
+  };
 
   // Render loading or error state
   if (loading) return (
@@ -787,7 +780,7 @@ export default function TeacherBooks() {
         </Modal.Body>
       </Modal>
 
-      <RatingModal />
+      {renderRatingModal()}
     </Container>
   );
 }

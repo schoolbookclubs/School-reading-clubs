@@ -6,8 +6,6 @@ import './StudentGuide.css';
 const StudentGuide = () => {
   const [selectedSection, setSelectedSection] = useState(null);
 
-  
-
   const benefits = [
     "مشاركة اهتمامات",
     "بناء صداقات هادفة",
@@ -27,12 +25,13 @@ const StudentGuide = () => {
   };
 
   return (
-    <div className="student-guide">
-      <Container>
-        <div className="guide-header text-center mb-5">
+    <div className="parent-guide-container">
+      <div className="parent-guide-content">
+        <section className="guide-header">
           <h1>برنامج أندية القراءة المدرسية</h1>
           <h2>دليل الطالب</h2>
-        </div>
+          <div className="header-underline"></div>
+        </section>
 
         <Row className="intro-section mb-5">
           <Col>
@@ -46,7 +45,7 @@ const StudentGuide = () => {
                   <p>
                     تدور بين الأعضاء أحاديث مسلية ومفيدة، ويطورون مهارات التفكير والتعبير والتنظيم والقيادة. وتعود هذه المناقشات على أعضاء المجموعة بالكثير من الفوائد التي تميزها عن القراءة المنفردة، بعض من هذه الفوائد:
                   </p>
-                  <ul className="benefits-list">
+                  <ul className="benefits-list px-5">
                     {benefits.map((benefit, index) => (
                       <li key={index}>{benefit}</li>
                     ))}
@@ -140,7 +139,7 @@ const StudentGuide = () => {
                 <Card.Text>
                   <ul className='px-5'>
                     <li><strong>الخيالية:</strong> من المغامرات إلى الخيال العلمي، الكتب الخيالية تنقلك إلى عوالم جديدة ومغامرات مشوقة.</li>
-                    <li><strong>الواقعية:</strong> تعلم عن أشخاص حقيقيين، وأماكن، وأحداث. الكتب الواقعية تساعدك على اكتشاف حقائق مثيرة حول التاريخ، والعلوم، والفلسفة، وحضارات الشعوب.</li>
+                    <li><strong>الواقعية:</strong> تعلم عن أشخاص حقيقيين، وأماكن، وأحداث. الكتب الواقعية تفتح نوافذ على عوالم مختلفة.</li>
                     <li><strong>الكتب المصورة:</strong> هذه الكتب مثالية لمن يحبون الفن. الروايات المصورة تجمع بين القصص الرائعة والرسوم التوضيحية.</li>
                     <li><strong>الكلاسيكيات والأعمال الحديثة:</strong> غالبًا ما تجمع أندية الكتب بين الكلاسيكيات الخالدة والأعمال الحديثة المشهورة، مما يمنحك الفرصة لتجربة مجموعة متنوعة من الأساليب والقصص.</li>
                   </ul>
@@ -259,11 +258,17 @@ const StudentGuide = () => {
           </Col>
         </Row>
 
-        <div className="quote-section text-center mt-5">
-          <blockquote>
-            <p>"العقول الصغيرة تناقش الأشخاص، العقول المتوسطة تناقش الأحداث، العقول الكبيرة تناقش الأفكار"</p>
-          </blockquote>
-        </div>
+        <section className="wisdom-section">
+          <div className="wisdom-container">
+            <p className="wisdom-quote">
+              "العقول الصغيرة تناقش الأشخاص
+              <br />
+              العقول المتوسطة تناقش الأحداث
+              <br />
+              العقول الكبيرة تناقش الأفكار"
+            </p>
+          </div>
+        </section>
 
         {selectedSection && (
           <Modal show={!!selectedSection} onHide={closeSectionModal}>
@@ -275,7 +280,7 @@ const StudentGuide = () => {
             </Modal.Body>
           </Modal>
         )}
-      </Container>
+      </div>
     </div>
   );
 };

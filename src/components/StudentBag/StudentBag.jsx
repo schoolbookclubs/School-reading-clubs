@@ -8,6 +8,7 @@ const StudentBag = () => {
   const [selectedSection, setSelectedSection] = useState('');
   const [showEffectiveDialogueSkillsModal, setShowEffectiveDialogueSkillsModal] = useState(false);
   const [selectedDialogueSkill, setSelectedDialogueSkill] = useState(null);
+  const [expandedSkills, setExpandedSkills] = useState({});
 
   const sections = [
     {
@@ -345,45 +346,80 @@ const StudentBag = () => {
     );
   };
 
-  const EffectiveDialogueSkillsModal = () => {
+  const toggleSkillExpansion = (index) => {
+    setExpandedSkills(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  const DialogueSkillsModal = () => {
     return (
       <Modal 
         show={showEffectiveDialogueSkillsModal} 
-        onHide={() => setShowEffectiveDialogueSkillsModal(false)} 
-        size="xl" 
-        centered 
+        onHide={() => setShowEffectiveDialogueSkillsModal(false)}
+        centered
+        size="lg"
         className="dialogue-skills-modal"
       >
-        <Modal.Header >
-          <Modal.Title>
-            <FaCommentAlt /> مهارات الحوار الفعال 
+        <Modal.Header className="position-relative">
+          <span 
+            aria-hidden="true" 
+            style={{ 
+              fontSize: '1.5rem', 
+              color: 'black', 
+              cursor: 'pointer',
+              position: 'absolute',
+              left: '15px',
+              top: '15px'
+            }}
+            onClick={() => setShowEffectiveDialogueSkillsModal(false)}
+          >
+            ×
+          </span>
+          <Modal.Title className="w-100 text-right">
+            <div style={{ fontSize: '1.5rem', color: 'black', marginRight: '15px' }}>
+              مهارات الحوار الفعال
+            </div>
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="dialogue-skills-content">
-            <p className="intro-text">
-              تعد مهارات الحوار الفعال من أهم المهارات التي ستتطور لديكم من خلال نادي القراءة. 
-              إليك التوجيهات الأساسية لمشاركة فعالة وبناءة.
-            </p>
-            <div className="skills-grid">
-              {dialogueSkills.map((skill, index) => (
-                <div key={index} className="skill-card">
-                  <div className="skill-icon">{skill.icon}</div>
-                  <h5>{skill.title}</h5>
-                  <p>{skill.description}</p>
-                  <Button 
-                    variant="primary" 
-                    onClick={() => {
-                      setSelectedDialogueSkill(skill);
-                      setShowEffectiveDialogueSkillsModal(false);
-                    }}
-                  >
-                    اعرف المزيد
-                  </Button>
+          {dialogueSkills.map((skill, index) => (
+            <div key={index} className="dialogue-skill-item mb-3">
+              <div 
+                onClick={() => toggleSkillExpansion(index)}
+                className="d-flex justify-content-between align-items-center skill-header"
+                style={{ 
+                  cursor: 'pointer', 
+                  backgroundColor: '#f8f9fa', 
+                  padding: '10px', 
+                  borderRadius: '5px',
+                  transition: 'background-color 0.3s ease'
+                }}
+              >
+                <h5 className="mb-0">{skill.title}</h5>
+                <FaCommentAlt 
+                  style={{ 
+                    transform: expandedSkills[index] ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease'
+                  }} 
+                />
+              </div>
+              {expandedSkills[index] && (
+                <div 
+                  className="skill-content mt-2" 
+                  style={{ 
+                    padding: '10px', 
+                    backgroundColor: '#f1f3f5', 
+                    borderRadius: '5px',
+                    animation: 'fadeIn 0.3s ease-in-out'
+                  }}
+                >
+                  <p>{skill.fullText}</p>
                 </div>
-              ))}
+              )}
             </div>
-          </div>
+          ))}
         </Modal.Body>
       </Modal>
     );
@@ -456,10 +492,9 @@ const StudentBag = () => {
         />
       </Modal>
 
-      
-
-      <EffectiveDialogueSkillsModal />
+      <DialogueSkillsModal />
       <DetailedSkillModal />
+      <DialogueSkillsModal />
     </Container>
   );
 };

@@ -37,17 +37,17 @@ export default function Dashboard() {
     },
     {
       icon: 'fa-book-open',
-      title: 'مكتبة الكتب',
+      title: 'الكتب والتقييم',
       description: 'استعراض وإدارة الكتب الخاصة بك',
       link: '/Teacherbooks',
       buttonText: 'عرض الكتب'
     },
     {
-      icon: 'fa-users',
-      title: 'إدارة الطلاب',
-      description: 'تتبع وإدارة الطلاب في نادي القراءة',
-      link: '/StudentsTeacher',
-      buttonText: 'عرض الطلاب'
+      icon: 'fa-paper-plane',
+      title: 'دليل المعلم',
+      description: 'اقرأ دليل المعلم وتتبع التعليمات والارشادات',
+      link: '/TeacherGuide',
+      buttonText: 'عرض دليل المعلم'
     }
   ];
 
@@ -55,17 +55,17 @@ export default function Dashboard() {
   const studentDashboardCards = [
     {
       icon: 'fa-book-reader',
-      title: 'مكتبتي',
-      description: 'استعراض الكتب التي أقرأها وأكملتها',
+      title: 'الكتب والتقييم',
+      description: 'استعراض وتقييم الكتب الخاصة بك',
       link: '/LibraryStudent',
-      buttonText: 'عرض الكتب'
+      buttonText: 'عرض الكتب وتقييمها'
     },
     {
-      icon: 'fa-star',
-      title: 'التقييم الذاتي',
-      description: 'تتبع تقدمك وإنجازاتك في القراءة',
-      link: '/Selfassessment',
-      buttonText: 'تقييم ذاتي'
+      icon: 'fa-book-open',
+      title: 'دليل الطالب',
+      description: 'تتبع التعليمات والارشادات في الدليل الخاص بك',
+      link: '/StudentGuide',
+      buttonText: 'افتح دليل الطالب'
     },
     {
       icon: 'fa-trophy',
@@ -79,11 +79,11 @@ export default function Dashboard() {
   // Parent Dashboard Sections
   const parentDashboardCards = [
     {
-      icon: 'fa-home',
-      title: 'الصفحة الرئيسية',
-      description: 'لوحة متابعة أداء طفلك',
-      link: '/dashboard',
-      buttonText: 'متابعة'
+      icon: 'fa-book-reader',
+      title: 'دليل ولي الامر',
+      description: 'اقراء دليل ولي الامر وتتبع التعليمات والارشادات',
+      link: '/ParentGuide',
+      buttonText: 'دليل ولي الامر'
     },
     {
       icon: 'fa-user',

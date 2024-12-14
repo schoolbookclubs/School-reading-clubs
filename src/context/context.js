@@ -136,21 +136,54 @@ export default function DataContextFunction({ children }) {
   const rateStudent = async (studentId, ratingData) => {
     try {
       const decodedToken = decodeToken(token);
-      const id = decodedToken.id;
+      const teacherId = decodedToken.id;
+      
+      // Ensure all required fields are present
+      const completeRatingData = {
+        teacher: teacherId,
+        student: studentId,
+        book: ratingData.bookId,
+        audience: ratingData.ratings.audience || 'لا',
+        readingSkills: {
+          completeReading: ratingData.ratings.readingSkills.completeReading || 1,
+          deepUnderstanding: ratingData.ratings.readingSkills.deepUnderstanding || 1,
+          personalReflection: ratingData.ratings.readingSkills.personalReflection || 1
+        },
+        confidence: ratingData.ratings.confidence || 1,
+        criticalThinking: {
+          creativeIdeas: ratingData.ratings.criticalThinking.creativeIdeas || 1,
+          connectingExperiences: ratingData.ratings.criticalThinking.connectingExperiences || 1,
+          independentThinking: ratingData.ratings.criticalThinking.independentThinking || 1
+        },
+        communicationSkills: {
+          clearExpression: ratingData.ratings.communicationSkills.clearExpression || 1,
+          activeListening: ratingData.ratings.communicationSkills.activeListening || 1,
+          constructiveFeedback: ratingData.ratings.communicationSkills.constructiveFeedback || 1
+        },
+        socialSkills: {
+          activeParticipation: ratingData.ratings.socialSkills.activeParticipation || 1,
+          respectingDiversity: ratingData.ratings.socialSkills.respectingDiversity || 1,
+          buildingFriendships: ratingData.ratings.socialSkills.buildingFriendships || 1
+        },
+        generalBehavior: {
+          collaboration: ratingData.ratings.generalBehavior.collaboration || 1
+        }
+      };
       
       const response = await axios.post(
-        `https://school-book-clubs-backend.vercel.app/api/RateTeacher/${id}/${studentId}`, 
-        ratingData,
+        `https://school-book-clubs-backend.vercel.app/api/RateTeacher/${teacherId}/${studentId}`, 
+        completeRatingData,
         {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
           }
         }
       );
       
       return response.data;
     } catch (error) {
-      console.error('Error rating student:', error);
+      console.error('Error rating student:', error.response?.data || error.message);
       throw error;
     }
   };

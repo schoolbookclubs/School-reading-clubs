@@ -406,8 +406,8 @@
 }
 
 .dialogue-skills-modal .modal-header {
-  background-color: #2980b9;
-  color: white;
+  background-color: #f8f9fa;
+  color: rgb(15, 8, 8);
   border-bottom: none;
 }
 
@@ -537,4 +537,23 @@
 
 .skill-card .btn-primary:hover {
   background-color: #3498db;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dialogue-skills-modal .skill-header:hover {
+  background-color: #e9ecef !important;
+}
+
+.dialogue-skills-modal .skill-content {
+  animation: fadeIn 0.3s ease-in-out;
 }

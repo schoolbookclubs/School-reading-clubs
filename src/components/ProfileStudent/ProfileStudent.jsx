@@ -143,8 +143,8 @@ export default function ProfileStudent() {
                     <div className="d-flex align-items-center">
                       <FaUser className="me-3 text-warning" style={{ fontSize: '1.5rem' }} />
                       <div>
-                        <h6 className="mb-1 text-muted">الدور</h6>
-                        <p className="mb-0">{studentData?.role || 'طالب'}</p>
+                        <h6 className="mb-1 text-muted">الصف</h6>
+                        <p className="mb-0">{studentData?.grade || 'غير متوفر'}</p>
                       </div>
                     </div>
                   </Col>

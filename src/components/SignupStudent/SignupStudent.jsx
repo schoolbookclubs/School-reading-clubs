@@ -22,7 +22,9 @@ const SignupStudent = () => {
       .required('كلمة المرور مطلوبة')
       .min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
     schoolCode: Yup.string()
-      .required('رمز المدرسة مطلوب')
+      .required('رمز المدرسة مطلوب'),
+    grade: Yup.string()
+      .required('الصف مطلوب')
   });
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -32,6 +34,7 @@ const SignupStudent = () => {
         email: values.email,
         password: values.password,
         schoolCode: values.schoolCode,
+        grade : values.grade,
         role: 'طالب'
       });
 
@@ -72,7 +75,7 @@ const SignupStudent = () => {
               )}
 
               <Formik
-                initialValues={{ name: '', email: '', password: '', schoolCode: '' }}
+                initialValues={{ name: '', email: '', password: '', schoolCode: '', grade: '' }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
               >
@@ -93,6 +96,7 @@ const SignupStudent = () => {
                         value={values.name}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        placeholder="ادخل الاسم"
                         isInvalid={touched.name && errors.name}
                       />
                       <BootstrapForm.Control.Feedback type="invalid">
@@ -108,6 +112,7 @@ const SignupStudent = () => {
                         value={values.email}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        placeholder="ادخل البريد الإلكتروني"
                         isInvalid={touched.email && errors.email}
                       />
                       <BootstrapForm.Control.Feedback type="invalid">
@@ -123,6 +128,7 @@ const SignupStudent = () => {
                         value={values.password}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        placeholder="ادخل كلمة المرور"
                         isInvalid={touched.password && errors.password}
                       />
                       <BootstrapForm.Control.Feedback type="invalid">
@@ -138,10 +144,27 @@ const SignupStudent = () => {
                         value={values.schoolCode}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        placeholder="ادخل رمز المدرسة"
                         isInvalid={touched.schoolCode && errors.schoolCode}
                       />
                       <BootstrapForm.Control.Feedback type="invalid">
                         {errors.schoolCode}
+                      </BootstrapForm.Control.Feedback>
+                    </BootstrapForm.Group>
+
+                    <BootstrapForm.Group className="mb-3">
+                      <BootstrapForm.Label className="fs-5">الصف الدراسي</BootstrapForm.Label>
+                      <BootstrapForm.Control
+                        type="text"
+                        name="grade"
+                        value={values.grade}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="أدخل الصف الدراسي"
+                        isInvalid={touched.grade && errors.grade}
+                      />
+                      <BootstrapForm.Control.Feedback type="invalid">
+                        {errors.grade}
                       </BootstrapForm.Control.Feedback>
                     </BootstrapForm.Group>
 

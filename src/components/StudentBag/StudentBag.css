@@ -406,8 +406,8 @@
 }
 
 .dialogue-skills-modal .modal-header {
-  background-color: #f8f9fa;
-  color: rgb(15, 8, 8);
+  background-color: #2980b9;
+  color:#f4f6f7;
   border-bottom: none;
 }
 
@@ -551,7 +551,7 @@
 }
 
 .dialogue-skills-modal .skill-header:hover {
-  background-color: #e9ecef !important;
+  background-color: #091f35 !important;
 }
 
 .dialogue-skills-modal .skill-content {

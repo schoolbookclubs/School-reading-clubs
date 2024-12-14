@@ -111,11 +111,27 @@ export default function TeacherBooks() {
   };
 
   // Updated skills array with comprehensive rating options
-  const skills = [
+  const evaluationCriteria = [
+    // Attendance Skill
+    {
+      id: 'attendanceHeader',
+      name: 'الحضور',
+      type: 'header',
+      category: 'attendance'
+    },
     {
       id: 'attendance',
       name: 'الحضور',
-      type: 'boolean'
+      type: 'attendance',
+      category: 'attendance'
+    },
+    
+    // Reading Skills Group Header
+    {
+      id: 'readingSkillsHeader',
+      name: 'مهارات القراءة والفهم',
+      type: 'header',
+      category: 'readingSkills'
     },
     {
       id: 'completeReading',
@@ -135,10 +151,27 @@ export default function TeacherBooks() {
       type: 'rating',
       category: 'readingSkills'
     },
+    
+    // Confidence Group Header
     {
-      id: 'confidence',
+      id: 'confidenceHeader',
+      name: 'الثقة بالنفس',
+      type: 'header',
+      category: 'confidence'
+    },
+    {
+      id: 'confidenceExpression',
       name: 'يشارك بثقة ويعبر عن رأيه بحرية',
-      type: 'rating'
+      type: 'rating',
+      category: 'confidence'
+    },
+    
+    // Critical Thinking Group Header
+    {
+      id: 'criticalThinkingHeader',
+      name: 'التفكير النقدي والابداعي',
+      type: 'header',
+      category: 'criticalThinking'
     },
     {
       id: 'creativeIdeas',
@@ -147,7 +180,7 @@ export default function TeacherBooks() {
       category: 'criticalThinking'
     },
     {
-      id: 'connectingExperiences',
+      id: 'lifeConnectionThinking',
       name: 'يربط بين النصوص المقروءة وتجارب الحياة الواقعية',
       type: 'rating',
       category: 'criticalThinking'
@@ -158,8 +191,16 @@ export default function TeacherBooks() {
       type: 'rating',
       category: 'criticalThinking'
     },
+    
+    // Communication Skills Group Header
     {
-      id: 'clearExpression',
+      id: 'communicationSkillsHeader',
+      name: 'مهارات التواصل',
+      type: 'header',
+      category: 'communicationSkills'
+    },
+    {
+      id: 'clearCommunication',
       name: 'يعبر عن أفكاره بلغة واضحة ودقيقة',
       type: 'rating',
       category: 'communicationSkills'
@@ -171,10 +212,18 @@ export default function TeacherBooks() {
       category: 'communicationSkills'
     },
     {
-      id: 'constructiveFeedback',
+      id: 'constructiveInteraction',
       name: 'يتفاعل مع آراء الآخرين بطرح أسئلة أو تقديم ردود بناءة',
       type: 'rating',
       category: 'communicationSkills'
+    },
+    
+    // Social Skills Group Header
+    {
+      id: 'socialSkillsHeader',
+      name: 'المهارات الاجتماعية',
+      type: 'header',
+      category: 'socialSkills'
     },
     {
       id: 'activeParticipation',
@@ -183,7 +232,7 @@ export default function TeacherBooks() {
       category: 'socialSkills'
     },
     {
-      id: 'respectingDiversity',
+      id: 'respectDiversity',
       name: 'يحترم وجهات النظر المختلفة',
       type: 'rating',
       category: 'socialSkills'
@@ -193,6 +242,14 @@ export default function TeacherBooks() {
       name: 'يكون صداقات بناءة مع أقرانه',
       type: 'rating',
       category: 'socialSkills'
+    },
+    
+    // General Behavior Group Header
+    {
+      id: 'generalBehaviorHeader',
+      name: 'السلوك العام',
+      type: 'header',
+      category: 'generalBehavior'
     },
     {
       id: 'collaboration',
@@ -207,33 +264,20 @@ export default function TeacherBooks() {
     const defaultRatings = {};
     students.forEach(student => {
       defaultRatings[student._id] = {
-        // Boolean skills
         attendance: 'لا',
-
-        // Reading Skills
         completeReading: 1,
         deepUnderstanding: 1,
         personalReflection: 1,
-
-        // Confidence
-        confidence: 1,
-
-        // Critical Thinking
+        confidenceExpression: 1,
         creativeIdeas: 1,
-        connectingExperiences: 1,
+        lifeConnectionThinking: 1,
         independentThinking: 1,
-
-        // Communication Skills
-        clearExpression: 1,
+        clearCommunication: 1,
         activeListening: 1,
-        constructiveFeedback: 1,
-
-        // Social Skills
+        constructiveInteraction: 1,
         activeParticipation: 1,
-        respectingDiversity: 1,
+        respectDiversity: 1,
         buildingFriendships: 1,
-
-        // General Behavior
         collaboration: 1
       };
     });
@@ -289,26 +333,26 @@ export default function TeacherBooks() {
           studentId: student._id,
           bookId: selectedBook._id,
           ratings: {
-            audience: studentRating.attendance || 'لا',
+            attendance: studentRating.attendance === 'نعم' ? true : false,
             readingSkills: {
               completeReading: studentRating.completeReading || 1,
               deepUnderstanding: studentRating.deepUnderstanding || 1,
-              personalReflection: studentRating.personalReflection || 1
+              personalReflection: studentRating.personalReflection || 1,
             },
-            confidence: studentRating.confidence || 1,
+            confidence: studentRating.confidenceExpression || 1,
             criticalThinking: {
               creativeIdeas: studentRating.creativeIdeas || 1,
-              connectingExperiences: studentRating.connectingExperiences || 1,
+              lifeConnectionThinking: studentRating.lifeConnectionThinking || 1,
               independentThinking: studentRating.independentThinking || 1
             },
             communicationSkills: {
-              clearExpression: studentRating.clearExpression || 1,
+              clearCommunication: studentRating.clearCommunication || 1,
               activeListening: studentRating.activeListening || 1,
-              constructiveFeedback: studentRating.constructiveFeedback || 1
+              constructiveInteraction: studentRating.constructiveInteraction || 1
             },
             socialSkills: {
               activeParticipation: studentRating.activeParticipation || 1,
-              respectingDiversity: studentRating.respectingDiversity || 1,
+              respectDiversity: studentRating.respectDiversity || 1,
               buildingFriendships: studentRating.buildingFriendships || 1
             },
             generalBehavior: {
@@ -448,39 +492,51 @@ export default function TeacherBooks() {
                   </tr>
                 </thead>
                 <tbody>
-                  {skills.map((skill) => (
+                  {evaluationCriteria.map((skill) => (
                     <tr key={skill.id}>
-                      <td className="font-weight-bold text-right">{skill.name}</td>
-                      {students.map((student) => (
-                        <td key={student._id}>
-                          {skill.type === 'boolean' ? (
-                            <Form.Control
-                              as="select"
-                              size="sm"
-                              value={studentRatings[student._id]?.[skill.id] || 'لا'}
-                              onChange={(e) => updateStudentRating(student._id, skill.id, e.target.value)}
-                              className="text-center"
-                            >
-                              <option value="نعم">نعم</option>
-                              <option value="لا">لا</option>
-                            </Form.Control>
-                          ) : (
-                            <Form.Control
-                              as="select"
-                              size="sm"
-                              value={studentRatings[student._id]?.[skill.id] || 1}
-                              onChange={(e) => updateStudentRating(student._id, skill.id, e.target.value)}
-                              className="text-center"
-                            >
-                              {[1, 2, 3, 4, 5].map((rating) => (
-                                <option key={rating} value={rating}>
-                                  {rating}
-                                </option>
-                              ))}
-                            </Form.Control>
-                          )}
-                        </td>
-                      ))}
+                      {skill.type === 'header' ? (
+                        <td colSpan={students.length + 1} className="bg-light font-weight-bold text-right">{skill.name}</td>
+                      ) : (
+                        <>
+                          <td className="font-weight-bold text-right">{skill.name}</td>
+                          {students.map((student) => (
+                            <td key={student._id}>
+                              {skill.type === 'attendance' ? (
+                                <Form.Select
+                                  size="sm"
+                                  value={studentRatings[student._id]?.[skill.id] || 'لا'}
+                                  onChange={(e) => updateStudentRating(student._id, skill.id, e.target.value)}
+                                  className="text-center"
+                                >
+                                  <option value="لا">لا</option>
+                                  <option value="نعم">نعم</option>
+                                </Form.Select>
+                              ) : skill.type === 'boolean' ? (
+                                <Form.Check
+                                  type="checkbox"
+                                  checked={studentRatings[student._id]?.[skill.id] || false}
+                                  onChange={(e) => updateStudentRating(student._id, skill.id, e.target.checked)}
+                                  className="text-center"
+                                />
+                              ) : (
+                                <Form.Control
+                                  as="select"
+                                  size="sm"
+                                  value={studentRatings[student._id]?.[skill.id] || 1}
+                                  onChange={(e) => updateStudentRating(student._id, skill.id, e.target.value)}
+                                  className="text-center"
+                                >
+                                  {[1, 2, 3, 4, 5].map((rating) => (
+                                    <option key={rating} value={rating}>
+                                      {rating}
+                                    </option>
+                                  ))}
+                                </Form.Control>
+                              )}
+                            </td>
+                          ))}
+                        </>
+                      )}
                     </tr>
                   ))}
                 </tbody>

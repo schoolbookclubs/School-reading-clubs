@@ -367,7 +367,7 @@ const StudentBag = () => {
             aria-hidden="true" 
             style={{ 
               fontSize: '1.5rem', 
-              color: 'black', 
+              color: 'white', 
               cursor: 'pointer',
               position: 'absolute',
               left: '15px',
@@ -378,7 +378,7 @@ const StudentBag = () => {
             ×
           </span>
           <Modal.Title className="w-100 text-right">
-            <div style={{ fontSize: '1.5rem', color: 'black', marginRight: '15px' }}>
+            <div style={{ fontSize: '1.5rem', color: 'white', marginRight: '15px' }}>
               مهارات الحوار الفعال
             </div>
           </Modal.Title>
@@ -391,7 +391,8 @@ const StudentBag = () => {
                 className="d-flex justify-content-between align-items-center skill-header"
                 style={{ 
                   cursor: 'pointer', 
-                  backgroundColor: '#f8f9fa', 
+                  backgroundColor: '#2980b9',
+                  color: 'white', 
                   padding: '10px', 
                   borderRadius: '5px',
                   transition: 'background-color 0.3s ease'

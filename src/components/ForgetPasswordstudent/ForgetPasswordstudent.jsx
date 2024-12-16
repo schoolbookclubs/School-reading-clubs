@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './ForgetPasswordStudent.css';
 
-const ForgetPasswordstudent = () => {
+const ForgetPasswordStudent = () => {
+  const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-  const [alertVariant, setAlertVariant] = useState('success');
+  const [alertVariant, setAlertVariant] = useState('');
 
-  const validationSchema = Yup.object().shape({
+  const validationSchema = Yup.object({
     email: Yup.string()
       .email('البريد الإلكتروني غير صالح')
       .required('البريد الإلكتروني مطلوب'),
@@ -28,6 +30,9 @@ const ForgetPasswordstudent = () => {
       setAlertMessage(response?.data?.message);
       setShowAlert(true);
       resetForm();
+      setTimeout(() => {
+        navigate('/LoginStudent');
+      }, 3000);
     } catch (error) {
       setAlertVariant('danger');
       setAlertMessage(error.response?.data?.message || 'حدث خطأ أثناء تغيير كلمة المرور');
@@ -37,94 +42,112 @@ const ForgetPasswordstudent = () => {
   };
 
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center">
-        <Col md={6}>
-          <Card className="shadow">
-            <Card.Body className="p-4">
-              <h2 className="text-center mb-4" style={{ color: '#2c3e50' }}>تغيير كلمة المرور الطالب</h2>
-              
-              {showAlert && (
-                <Alert 
-                  variant={alertVariant} 
-                  onClose={() => setShowAlert(false)} 
-                  dismissible
-                  className="mb-4"
-                >
-                  {alertMessage}
-                </Alert>
-              )}
+    <div className="forgot-password-container">
+      <div className="forgot-password-card">
+        <h2 className="forgot-password-title">
+          
+          تغيير كلمة المرور
+          <i className="fas fa-key"></i>
+        </h2>
 
-              <Formik
-                initialValues={{
-                  email: '',
-                  newPassword: '',
-                  confirmPassword: ''
-                }}
-                validationSchema={validationSchema}
-                onSubmit={handleSubmit}
-              >
-                {({ errors, touched, isSubmitting }) => (
-                  <Form dir='rtl'>
-                    <div className="mb-3">
-                      <label htmlFor="email" className="form-label">البريد الإلكتروني</label>
-                      <Field
-                        type="email"
-                        name="email"
-                        className={`form-control ${errors.email && touched.email ? 'is-invalid' : ''}`}
-                        placeholder="أدخل بريدك الإلكتروني"
-                      />
-                      {errors.email && touched.email && (
-                        <div className="invalid-feedback">{errors.email}</div>
-                      )}
-                    </div>
+        {showAlert && (
+          <div className={`alert ${alertVariant}`}>
+            {alertMessage}
+          </div>
+        )}
 
-                    <div className="mb-3">
-                      <label htmlFor="newPassword" className="form-label">كلمة المرور الجديدة</label>
-                      <Field
-                        type="password"
-                        name="newPassword"
-                        className={`form-control ${errors.newPassword && touched.newPassword ? 'is-invalid' : ''}`}
-                        placeholder="أدخل كلمة المرور الجديدة"
-                      />
-                      {errors.newPassword && touched.newPassword && (
-                        <div className="invalid-feedback">{errors.newPassword}</div>
-                      )}
-                    </div>
-
-                    <div className="mb-4">
-                      <label htmlFor="confirmPassword" className="form-label">تأكيد كلمة المرور</label>
-                      <Field
-                        type="password"
-                        name="confirmPassword"
-                        className={`form-control ${errors.confirmPassword && touched.confirmPassword ? 'is-invalid' : ''}`}
-                        placeholder="أدخل تأكيد كلمة المرور"
-                      />
-                      {errors.confirmPassword && touched.confirmPassword && (
-                        <div className="invalid-feedback">{errors.confirmPassword}</div>
-                      )}
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-100 btn btn-primary btn-lg"
-                      disabled={isSubmitting}
-                      style={{ 
-                        backgroundColor: '#3498db',
-                        borderColor: '#3498db'
-                      }}
-                    >
-                      {isSubmitting ? 'جاري المعالجة...' : 'تغيير كلمة المرور'}
-                    </Button>
-                  </Form>
+        <Formik
+          initialValues={{
+            email: '',
+            newPassword: '',
+            confirmPassword: ''
+          }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ errors, touched, isSubmitting }) => (
+            <Form className="forgot-password-form" dir="rtl">
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-envelope"></i>
+                  البريد الإلكتروني
+                </label>
+                <Field
+                  type="email"
+                  name="email"
+                  className={`form-control ${errors.email && touched.email ? 'is-invalid' : ''}`}
+                  placeholder="أدخل بريدك الإلكتروني"
+                />
+                {errors.email && touched.email && (
+                  <div className="invalid-feedback">{errors.email}</div>
                 )}
-              </Formik>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-lock"></i>
+                  كلمة المرور الجديدة
+                </label>
+                <Field
+                  type="password"
+                  name="newPassword"
+                  className={`form-control ${errors.newPassword && touched.newPassword ? 'is-invalid' : ''}`}
+                  placeholder="أدخل كلمة المرور الجديدة"
+                />
+                {errors.newPassword && touched.newPassword && (
+                  <div className="invalid-feedback">{errors.newPassword}</div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-lock"></i>
+                  تأكيد كلمة المرور
+                </label>
+                <Field
+                  type="password"
+                  name="confirmPassword"
+                  className={`form-control ${errors.confirmPassword && touched.confirmPassword ? 'is-invalid' : ''}`}
+                  placeholder="أدخل تأكيد كلمة المرور"
+                />
+                {errors.confirmPassword && touched.confirmPassword && (
+                  <div className="invalid-feedback">{errors.confirmPassword}</div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="spinner-border"></div>
+                    جاري المعالجة...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-paper-plane"></i>
+                    تغيير كلمة المرور
+                  </>
+                )}
+              </button>
+
+              <div className="text-center">
+                <span
+                  style={{ color: '#3498db', cursor: 'pointer' }}
+                  onClick={() => navigate('/LoginStudent')}
+                >
+                  <i className="fas fa-arrow-right"></i>
+                  {' '}العودة لتسجيل الدخول
+                </span>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </div>
   );
 };
 
-export default ForgetPasswordstudent;
+export default ForgetPasswordStudent;

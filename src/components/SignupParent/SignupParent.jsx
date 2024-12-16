@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { Formik, Form } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { Container, Row, Col, Card, Form as BootstrapForm, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './SignupParent.css';
 
 const SignupParent = () => {
   const navigate = useNavigate();
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-  const [alertVariant, setAlertVariant] = useState('success');
+  const [alertVariant, setAlertVariant] = useState('');
 
-  const validationSchema = Yup.object().shape({
+  const validationSchema = Yup.object({
     name: Yup.string()
       .required('الاسم مطلوب')
       .min(2, 'الاسم يجب أن يكون حرفين على الأقل'),
@@ -59,163 +59,165 @@ const SignupParent = () => {
   };
 
   return (
-    <Container className="mt-5">
-      <Row className="justify-content-center">
-        <Col md={6}>
-          <Card className="shadow">
-            <Card.Body className="p-4">
-              <h2 className="text-center mb-4" style={{ color: '#2c3e50' }}>انشاء حساب ولي أمر جديد</h2>
-              <h2 className="text-center"> 👨‍👩‍👧‍👦</h2>
-              {showAlert && (
-                <Alert 
-                  variant={alertVariant} 
-                  onClose={() => setShowAlert(false)} 
-                  dismissible
-                >
-                  {alertMessage}
-                </Alert>
-              )}
+    <div className="signup-parent-container">
+      <div className="signup-parent-card">
+        <h2 className="signup-parent-title">
+          
+          انشاء حساب ولي أمر جديد
+          <i className="fas fa-user-plus"></i>
+        </h2>
+        <div className="text-center mb-4">
+          <span role="img" aria-label="family" style={{ fontSize: '2rem' }}>👨‍👩‍👧‍👦</span>
+        </div>
 
-              <Formik
-                initialValues={{
-                  name: '',
-                  email: '',
-                  password: '',
-                  studentcodeinparent: '',
-                  phone: '',
-                  schoolCode: ''
-                }}
-                validationSchema={validationSchema}
-                onSubmit={handleSubmit}
-              >
-                {({ handleSubmit, handleChange, values, touched, errors, isSubmitting }) => (
-                  <Form dir='rtl' noValidate onSubmit={handleSubmit}>
-                    <BootstrapForm.Group className="mb-3">
-                      <BootstrapForm.Label className="fs-5">الاسم</BootstrapForm.Label>
-                      <BootstrapForm.Control
-                        type="text"
-                        name="name"
-                        value={values.name}
-                        onChange={handleChange}
-                        placeholder="ادخل الاسم"
-                        isInvalid={touched.name && errors.name}
-                      />
-                      <BootstrapForm.Control.Feedback type="invalid">
-                        {errors.name}
-                      </BootstrapForm.Control.Feedback>
-                    </BootstrapForm.Group>
+        {showAlert && (
+          <div className={`alert ${alertVariant}`}>
+            {alertMessage}
+          </div>
+        )}
 
-                    <BootstrapForm.Group className="mb-3">
-                      <BootstrapForm.Label className="fs-5">البريد الإلكتروني</BootstrapForm.Label>
-                      <BootstrapForm.Control
-                        type="email"
-                        name="email"
-                        value={values.email}
-                        onChange={handleChange}
-                        placeholder="ادخل البريد الإلكتروني"
-                        isInvalid={touched.email && errors.email}
-                      />
-                      <BootstrapForm.Control.Feedback type="invalid">
-                        {errors.email}
-                      </BootstrapForm.Control.Feedback>
-                    </BootstrapForm.Group>
-
-                    <BootstrapForm.Group className="mb-3">
-                      <BootstrapForm.Label className="fs-5">كلمة المرور</BootstrapForm.Label>
-                      <BootstrapForm.Control
-                        type="password"
-                        name="password"
-                        value={values.password}
-                        onChange={handleChange}
-                        placeholder="ادخل كلمة المرور"
-                        isInvalid={touched.password && errors.password}
-                      />
-                      <BootstrapForm.Control.Feedback type="invalid">
-                        {errors.password}
-                      </BootstrapForm.Control.Feedback>
-                    </BootstrapForm.Group>
-
-                    <BootstrapForm.Group className="mb-3">
-                      <BootstrapForm.Label className="fs-5">الكود الخاص بالطالب</BootstrapForm.Label>
-                      <BootstrapForm.Control
-                        type="text"
-                        name="studentcodeinparent"
-                        value={values.studentcodeinparent}
-                        placeholder="ادخل الكود الخاص بالطالب"
-                        onChange={handleChange}
-                        isInvalid={touched.studentcodeinparent && errors.studentcodeinparent}
-                      />
-                      <BootstrapForm.Control.Feedback type="invalid">
-                        {errors.studentcodeinparent}
-                      </BootstrapForm.Control.Feedback>
-                    </BootstrapForm.Group>
-
-                    <Row>
-                      <Col md={6}>
-                        <BootstrapForm.Group className="mb-3">
-                          <BootstrapForm.Label className="fs-5">كود مدرسة الطالب</BootstrapForm.Label>
-                          <BootstrapForm.Control
-                            type="text"
-                            name="schoolCode"
-                            value={values.schoolCode}
-                            placeholder="ادخل كود المدرسة"
-                            onChange={handleChange}
-                            isInvalid={touched.schoolCode && errors.schoolCode}
-                          />
-                          <BootstrapForm.Control.Feedback type="invalid">
-                            {errors.schoolCode}
-                          </BootstrapForm.Control.Feedback>
-                        </BootstrapForm.Group>
-                      </Col>
-                    </Row>
-
-                    <BootstrapForm.Group className="mb-3">
-                      <BootstrapForm.Label className="fs-5">رقم الجوال</BootstrapForm.Label>
-                      <BootstrapForm.Control
-                        type="text"
-                        name="phone"
-                        value={values.phone}
-                        placeholder="ادخل رقم الجوال"
-                        onChange={handleChange}
-                        isInvalid={touched.phone && errors.phone}
-                      />
-                      <BootstrapForm.Control.Feedback type="invalid">
-                        {errors.phone}
-                      </BootstrapForm.Control.Feedback>
-                    </BootstrapForm.Group>
-
-                    <div className="d-grid">
-                      <Button
-                        variant="primary"
-                        type="submit"
-                        className="mb-3 fs-5"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? 'جاري التسجيل...' : 'انشاء حساب'}
-                      </Button>
-                    </div>
-                    <div className="text-center mt-3">
-                <p className="mb-0">
-                لديك حساب بالفعل؟{' '}
-                <Button
-                    variant="link"
-                    className="p-0 fs-5 text-decoration-none"
-                    onClick={() => navigate('/LoginParent')}
-                  >
-                    تسجيل الدخول
-                  </Button>
-                  
-                  
-                </p>
-              </div>
-                  </Form>
+        <Formik
+          initialValues={{
+            name: '',
+            email: '',
+            password: '',
+            studentcodeinparent: '',
+            phone: '',
+            schoolCode: ''
+          }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ errors, touched, isSubmitting }) => (
+            <Form className="signup-parent-form" dir="rtl">
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-user"></i>
+                  الاسم
+                </label>
+                <Field
+                  type="text"
+                  name="name"
+                  className={`form-control ${errors.name && touched.name ? 'is-invalid' : ''}`}
+                  placeholder="ادخل الاسم"
+                />
+                {errors.name && touched.name && (
+                  <div className="invalid-feedback">{errors.name}</div>
                 )}
-              </Formik>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-envelope"></i>
+                  البريد الإلكتروني
+                </label>
+                <Field
+                  type="email"
+                  name="email"
+                  className={`form-control ${errors.email && touched.email ? 'is-invalid' : ''}`}
+                  placeholder="ادخل البريد الإلكتروني"
+                />
+                {errors.email && touched.email && (
+                  <div className="invalid-feedback">{errors.email}</div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-lock"></i>
+                  كلمة المرور
+                </label>
+                <Field
+                  type="password"
+                  name="password"
+                  className={`form-control ${errors.password && touched.password ? 'is-invalid' : ''}`}
+                  placeholder="ادخل كلمة المرور"
+                />
+                {errors.password && touched.password && (
+                  <div className="invalid-feedback">{errors.password}</div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-id-card"></i>
+                  الكود الخاص بالطالب
+                </label>
+                <Field
+                  type="text"
+                  name="studentcodeinparent"
+                  className={`form-control ${errors.studentcodeinparent && touched.studentcodeinparent ? 'is-invalid' : ''}`}
+                  placeholder="ادخل الكود الخاص بالطالب"
+                />
+                {errors.studentcodeinparent && touched.studentcodeinparent && (
+                  <div className="invalid-feedback">{errors.studentcodeinparent}</div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-school"></i>
+                  كود مدرسة الطالب
+                </label>
+                <Field
+                  type="text"
+                  name="schoolCode"
+                  className={`form-control ${errors.schoolCode && touched.schoolCode ? 'is-invalid' : ''}`}
+                  placeholder="ادخل كود المدرسة"
+                />
+                {errors.schoolCode && touched.schoolCode && (
+                  <div className="invalid-feedback">{errors.schoolCode}</div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-phone"></i>
+                  رقم الجوال
+                </label>
+                <Field
+                  type="text"
+                  name="phone"
+                  className={`form-control ${errors.phone && touched.phone ? 'is-invalid' : ''}`}
+                  placeholder="ادخل رقم الجوال"
+                />
+                {errors.phone && touched.phone && (
+                  <div className="invalid-feedback">{errors.phone}</div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="spinner-border"></div>
+                    جاري التسجيل...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-user-plus"></i>
+                    انشاء حساب
+                  </>
+                )}
+              </button>
+
+              <div className="text-center">
+              لديك حساب بالفعل؟
+                <span
+                  style={{ color: '#3498db', cursor: 'pointer' }}
+                  onClick={() => navigate('/LoginParent')}
+                >
+                   تسجيل الدخول
+                </span>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </div>
   );
 };
 

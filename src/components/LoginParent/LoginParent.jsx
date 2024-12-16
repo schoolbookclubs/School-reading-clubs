@@ -1,152 +1,145 @@
 import React, { useState } from 'react';
-import { Formik, Form } from 'formik';
+import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import { Container, Row, Col, Card, Form as BootstrapForm, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import './LoginParent.css';
 import { DataContext } from '../../context/context.js';
 import { useContext } from 'react';
-import axios from 'axios';
 
 const LoginParent = () => {
   const navigate = useNavigate();
   const { setTokenAndUpdateRole } = useContext(DataContext);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-  const [alertVariant, setAlertVariant] = useState('success');
+  const [alertVariant, setAlertVariant] = useState('');
 
-  const validationSchema = Yup.object().shape({
+  const validationSchema = Yup.object({
     email: Yup.string()
       .email('البريد الإلكتروني غير صالح')
       .required('البريد الإلكتروني مطلوب'),
     password: Yup.string()
       .required('كلمة المرور مطلوبة')
-      .min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
   });
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const { data } = await axios.post('https://school-book-clubs-backend.vercel.app/api/parent/login', values);
       
-      if (data.message == 'تم تسجيل الدخول بنجاح') {
-        // Use the new method to set token and update role
+      if (data.message === 'تم تسجيل الدخول بنجاح') {
         setTokenAndUpdateRole(data.token);
-        setAlertVariant("success");
-        setAlertMessage("تم تسجيل الدخول بنجاح");
+        setAlertVariant('success');
+        setAlertMessage('تم تسجيل الدخول بنجاح');
         setShowAlert(true);
         setTimeout(() => {
-          navigate("/dashboard"); // إعادة التوجيه إلى صفحة dashboard
+          navigate('/dashboard');
         }, 2000);
       }
     } catch (error) {
-      console.log(error);
-      setAlertVariant("danger");
-      setAlertMessage(error.response.data.message);
+      setAlertVariant('danger');
+      setAlertMessage(error.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول');
       setShowAlert(true);
     }
+    setSubmitting(false);
   };
 
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center">
-        <Col md={6}>
-          <Card className="shadow">
-            <Card.Body className="p-4">
-            <h2 className="text-center mb-4" style={{ color: '#2c3e50' }}>تسجيل دخول ولي الامر  </h2>
-             <h2 className="text-center"> 👨‍👩‍👧‍👦</h2>
-              {showAlert && (
-                <Alert 
-                  variant={alertVariant} 
-                  onClose={() => setShowAlert(false)} 
-                  dismissible
-                >
-                  {alertMessage}
-                </Alert>
-              )}
+    <div className="login-parent-container">
+      <div className="login-parent-card">
+        <h2 className="login-parent-title">
+          
+          تسجيل دخول ولي الأمر
+          <i className="fas fa-sign-in-alt"></i>
+        </h2>
+        <div className="text-center mb-4">
+          <span role="img" aria-label="family" style={{ fontSize: '2rem' }}>👨‍👩‍👧‍👦</span>
+        </div>
 
-              <Formik
-                initialValues={{ email: '', password: '' }}
-                validationSchema={validationSchema}
-                onSubmit={handleSubmit}
-              >
-                {({
-                  values,
-                  errors,
-                  touched,
-                  handleChange,
-                  handleBlur,
-                  isSubmitting,
-                }) => (
-                  <Form dir="rtl" className="text-end">
-                    <BootstrapForm.Group className="mb-3">
-                      <BootstrapForm.Label className="fs-5" >البريد الإلكتروني</BootstrapForm.Label>
-                      <BootstrapForm.Control
-                        type="email"
-                        name="email"
-                        value={values.email}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        isInvalid={touched.email && errors.email}
-                      />
-                      <BootstrapForm.Control.Feedback type="invalid">
-                        {errors.email}
-                      </BootstrapForm.Control.Feedback>
-                    </BootstrapForm.Group>
+        {showAlert && (
+          <div className={`alert ${alertVariant}`}>
+            {alertMessage}
+          </div>
+        )}
 
-                    <BootstrapForm.Group className="mb-3">
-                      <BootstrapForm.Label className="fs-5">كلمة المرور</BootstrapForm.Label>
-                      <BootstrapForm.Control
-                        type="password"
-                        name="password"
-                        value={values.password}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        isInvalid={touched.password && errors.password}
-                      />
-                      <BootstrapForm.Control.Feedback type="invalid">
-                        {errors.password}
-                      </BootstrapForm.Control.Feedback>
-                    </BootstrapForm.Group>
-
-                    <Button
-                      variant="primary"
-                      type="submit"
-                      className="w-100 mb-3 fs-5"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'جاري التسجيل...' : 'تسجيل الدخول'}
-                    </Button>
-                  </Form>
+        <Formik
+          initialValues={{
+            email: '',
+            password: ''
+          }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ errors, touched, isSubmitting }) => (
+            <Form className="login-parent-form" dir="rtl">
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-envelope"></i>
+                  البريد الإلكتروني
+                </label>
+                <Field
+                  type="email"
+                  name="email"
+                  className={`form-control ${errors.email && touched.email ? 'is-invalid' : ''}`}
+                  placeholder="ادخل البريد الإلكتروني"
+                />
+                {errors.email && touched.email && (
+                  <div className="invalid-feedback">{errors.email}</div>
                 )}
-              </Formik>
-
-              <div className="text-center mt-3">
-                <p className="mb-1">
-                  <Button
-                    variant="link"
-                    className="p-0 fs-5 text-decoration-none"
-                    onClick={() => navigate('/forgot-password-parent')}
-                  >
-                    هل نسيت كلمة المرور؟
-                  </Button>
-                </p>
-                <p className="mb-0">
-                ليس لديك حساب؟{' '}
-                <Button
-                    variant="link"
-                    className="p-0 fs-5 text-decoration-none"
-                    onClick={() => navigate('/SignupParent')}
-                  >
-                    انشئ حساب جديد
-                  </Button>
-                
-                 
-                </p>
               </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <i className="fas fa-lock"></i>
+                  كلمة المرور
+                </label>
+                <Field
+                  type="password"
+                  name="password"
+                  className={`form-control ${errors.password && touched.password ? 'is-invalid' : ''}`}
+                  placeholder="ادخل كلمة المرور"
+                />
+                {errors.password && touched.password && (
+                  <div className="invalid-feedback">{errors.password}</div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="spinner-border"></div>
+                    جاري تسجيل الدخول...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-sign-in-alt"></i>
+                    تسجيل الدخول
+                  </>
+                )}
+              </button>
+
+              <div className="links-container">
+                <span
+                  className="link"
+                  onClick={() => navigate('/SignupParent')}
+                >
+                  إنشاء حساب جديد
+                </span>
+                <span
+                  className="link"
+                  onClick={() => navigate('/ForgotPasswordParent')}
+                >
+                  نسيت كلمة المرور؟
+                </span>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    </div>
   );
 };
 

@@ -5,7 +5,7 @@ import Layout from './components/layout/Layout.jsx';
 import WelcomePage from './components/WelcomePage/WelcomePage.jsx';
 import { ToastContainer } from 'react-toastify';
 import ForgetPasswordstudent from './components/ForgetPasswordstudent/ForgetPasswordstudent.jsx';
-import ForgetPasswordParent from './components/ForgetPasswordparent/ForgetPasswordparent.jsx';
+import ForgotPasswordParent from './components/ForgetPasswordparent/ForgetPasswordparent.jsx';
 import ForgetPasswordteacher from './components/ForgetPasswordteacher/ForgetPasswordteacher.jsx';
 import ForgotPasswordsupervisor from './components/ForgetPasswordsupervisor/ForgetPasswordsupervisor.jsx';
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated/RedirectIfAuthenticated.jsx';
@@ -94,8 +94,8 @@ export default function App() {
           element: <RedirectIfAuthenticated>  <ForgetPasswordstudent /></RedirectIfAuthenticated> 
         },
         { 
-          path: '/ForgetPasswordParent', 
-          element: <RedirectIfAuthenticated><ForgetPasswordParent /></RedirectIfAuthenticated> 
+          path: '/ForgotPasswordParent', 
+          element: <RedirectIfAuthenticated><ForgotPasswordParent /></RedirectIfAuthenticated> 
         },
         { 
           path: '/ForgetPasswordteacher', 

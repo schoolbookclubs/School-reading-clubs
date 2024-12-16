@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {jwtDecode} from 'jwt-decode';
 import { submitReadingClubEvaluation } from '../../context/EvaluationContext';
 import './ReadingClubEvaluation.css';
 
@@ -28,7 +29,14 @@ export default function ReadingClubEvaluation() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await submitReadingClubEvaluation(formData);
+      const token = localStorage.getItem('token');
+      const decodedToken = jwtDecode(token);
+      const schoolCode = decodedToken.schoolCode;
+
+      await submitReadingClubEvaluation({
+        ...formData,
+        schoolCode
+      });
       setSubmissionStatus({ success: true, error: false });
       
       // Reset form after successful submission

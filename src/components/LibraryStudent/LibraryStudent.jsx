@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { DataContext } from '../../context/context.js';
 import { FaStar, FaBook, FaSpinner, FaCheckCircle, FaExclamationCircle, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
+import {jwtDecode} from 'jwt-decode';
 import './LibraryStudent.css';
 
 // Success Popup Component
@@ -93,6 +94,7 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
   const [errors, setErrors] = useState({});
   const [showAPIResponseModal, setShowAPIResponseModal] = useState(false);
   const [apiResponse, setAPIResponse] = useState({ type: '', message: '' });
+  const decodedToken = jwtDecode(localStorage.getItem('token'));
 
   const validateForm = () => {
     const newErrors = {};
@@ -168,7 +170,8 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
 
         const submissionData = {
           ...sanitizedReview,
-          bookRating: rating  // Rename rating to bookRating to match backend
+          bookRating: rating,  // Rename rating to bookRating to match backend
+          schoolCode: decodedToken.schoolCode // Add schoolCode
         };
 
         const response = await onSubmit(submissionData);
@@ -430,6 +433,7 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
   const [apiResponse, setAPIResponse] = useState({ type: '', message: '' });
   const [validationError, setValidationError] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const decodedToken = jwtDecode(localStorage.getItem('token'));
 
   const assessmentLabels = {
     enjoyedReading: 'استمتعت بالقراءة',
@@ -475,7 +479,10 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
         futureReadingPlans: ''
       });
 
-      const response = await onSubmit(assessmentData);
+      const response = await onSubmit({
+        ...assessmentData,
+        schoolCode: decodedToken.schoolCode // Add schoolCode
+      });
       
       // Only set success modal if submission is successful
       setAPIResponse({ 

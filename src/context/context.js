@@ -137,12 +137,14 @@ export default function DataContextFunction({ children }) {
     try {
       const decodedToken = decodeToken(token);
       const teacherId = decodedToken.id;
-      
+      const schoolCode = decodedToken.schoolCode;
+
       // Ensure all required fields are present
       const completeRatingData = {
         teacher: teacherId,
         student: studentId,
         book: ratingData.bookId,
+        schoolCode: schoolCode,
         audience: ratingData.ratings.audience || 'لا',
         readingSkills: {
           completeReading: ratingData.ratings.readingSkills.completeReading || 1,
@@ -230,11 +232,13 @@ export default function DataContextFunction({ children }) {
       const token = localStorage.getItem('token');
       const decodedToken = jwtDecode(token);
       const studentId = decodedToken.id;
+      const schoolCode = decodedToken.schoolCode;
 
       // Ensure all fields are present and have a value
       const selfAssessmentPayload = {
         studentId: studentId,
         bookId: bookId,
+        schoolCode: schoolCode,
         enjoyedReading: assessmentData.enjoyedReading || 0,
         readUsefulBooks: assessmentData.readUsefulBooks || 0,
         madeNewFriends: assessmentData.madeNewFriends || 0,
@@ -287,9 +291,11 @@ export default function DataContextFunction({ children }) {
       const decodedToken = jwtDecode(token);
       
       // Prepare full assessment data with parentId
+      const schoolCode = decodedToken.schoolCode;
       const fullAssessmentData = {
         ...assessmentData,
-        parentId: decodedToken._id
+        parentId: decodedToken._id,
+        schoolCode
       };
 
       const response = await axios.post(
@@ -305,6 +311,139 @@ export default function DataContextFunction({ children }) {
     } catch (error) {
       console.error('Error submitting parent assessment:', error.response ? error.response.data : error.message);
       throw error;
+    }
+  };
+
+  const getTeacherRatings = async () => {
+    try {
+      const decoded = decodeToken(token);
+      const schoolCode = decoded?.schoolCode;
+      if (!schoolCode) throw new Error('School code not found in token');
+
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/RateTeacher/oneschool/${schoolCode}/Teachersratings`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching teacher ratings:', error);
+      return null;
+    }
+  };
+
+  const getStudentBookRatings = async () => {
+    try {
+      const decoded = decodeToken(token);
+      const schoolCode = decoded?.schoolCode;
+      if (!schoolCode) throw new Error('School code not found in token');
+
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/RateingStudentBook/RateingStudentBookbyschoolcode/${schoolCode}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching student book ratings:', error);
+      return null;
+    }
+  };
+
+  const getStudentSelfAssessments = async () => {
+    try {
+      const decoded = decodeToken(token);
+      const schoolCode = decoded?.schoolCode;
+      if (!schoolCode) throw new Error('School code not found in token');
+
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/StudentSelfAssessment/oneschool/${schoolCode}/StudentsSelfAssessments`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching student self assessments:', error);
+      return null;
+    }
+  };
+
+  const getReadingClubEvaluations = async () => {
+    try {
+      const decoded = decodeToken(token);
+      const schoolCode = decoded?.schoolCode;
+      if (!schoolCode) throw new Error('School code not found in token');
+
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/ReadingClubEvaluation/oneschool/${schoolCode}/ReadingClubEvaluations`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching reading club evaluations:', error);
+      return null;
+    }
+  };
+
+  const getParentAssessments = async () => {
+    try {
+      const decoded = decodeToken(token);
+      const schoolCode = decoded?.schoolCode;
+      if (!schoolCode) throw new Error('School code not found in token');
+
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/ParentAssessment/parentAssessmentsByschoolCode/${schoolCode}/parentAssessments`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching parent assessments:', error);
+      return null;
+    }
+  };
+
+  const getSchoolAttendance = async () => {
+    try {
+      const decoded = decodeToken(token);
+      const schoolCode = decoded?.schoolCode;
+      if (!schoolCode) throw new Error('School code not found in token');
+
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/RateTeacher/attendance/oneschool/${schoolCode}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching school attendance:', error);
+      return null;
+    }
+  };
+
+  const getUniqueSchoolBooks = async () => {
+    try {
+      const decoded = decodeToken(token);
+      const schoolCode = decoded?.schoolCode;
+      if (!schoolCode) throw new Error('School code not found in token');
+
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/RateingStudentBook/uniquebooksoneschool/${schoolCode}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching unique books:', error);
+      return null;
     }
   };
 
@@ -327,7 +466,14 @@ export default function DataContextFunction({ children }) {
         fetchBooksBySchoolCode,
         submitBookRating,
         submitSelfAssessment,
-        submitParentAssessment
+        submitParentAssessment,
+        getTeacherRatings,
+        getStudentBookRatings,
+        getStudentSelfAssessments,
+        getReadingClubEvaluations,
+        getParentAssessments,
+        getSchoolAttendance,
+        getUniqueSchoolBooks
       }}
     >
       {children}

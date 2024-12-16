@@ -13,10 +13,12 @@ export const submitReadingClubEvaluation = async (evaluationData) => {
     
     const decodedToken = jwtDecode(token);
     const studentId = decodedToken.id;
+    const schoolCode = decodedToken.schoolCode;
 
     // Prepare full evaluation data
     const fullEvaluationData = {
       studentId,
+      schoolCode,
       ...evaluationData
     };
 

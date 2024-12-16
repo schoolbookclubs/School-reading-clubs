@@ -24,7 +24,9 @@ const SignupParent = () => {
     studentcodeinparent: Yup.string()
       .required('رمز الطالب مطلوب'),
     phone: Yup.string()
-      .required('رقم الجوال مطلوب')
+      .required('رقم الجوال مطلوب'),
+    schoolCode: Yup.string()
+      .required('رمز المدرسة مطلوب')
   });
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -35,6 +37,7 @@ const SignupParent = () => {
         password: values.password,
         studentcodeinparent: values.studentcodeinparent,
         phone: values.phone,
+        schoolCode: values.schoolCode,
         role: 'ولي أمر'
       });
 
@@ -79,7 +82,8 @@ const SignupParent = () => {
                   email: '',
                   password: '',
                   studentcodeinparent: '',
-                  phone: ''
+                  phone: '',
+                  schoolCode: ''
                 }}
                 validationSchema={validationSchema}
                 onSubmit={handleSubmit}
@@ -93,6 +97,7 @@ const SignupParent = () => {
                         name="name"
                         value={values.name}
                         onChange={handleChange}
+                        placeholder="ادخل الاسم"
                         isInvalid={touched.name && errors.name}
                       />
                       <BootstrapForm.Control.Feedback type="invalid">
@@ -107,6 +112,7 @@ const SignupParent = () => {
                         name="email"
                         value={values.email}
                         onChange={handleChange}
+                        placeholder="ادخل البريد الإلكتروني"
                         isInvalid={touched.email && errors.email}
                       />
                       <BootstrapForm.Control.Feedback type="invalid">
@@ -121,6 +127,7 @@ const SignupParent = () => {
                         name="password"
                         value={values.password}
                         onChange={handleChange}
+                        placeholder="ادخل كلمة المرور"
                         isInvalid={touched.password && errors.password}
                       />
                       <BootstrapForm.Control.Feedback type="invalid">
@@ -129,11 +136,12 @@ const SignupParent = () => {
                     </BootstrapForm.Group>
 
                     <BootstrapForm.Group className="mb-3">
-                      <BootstrapForm.Label className="fs-5">رمز الطالب المدرسي</BootstrapForm.Label>
+                      <BootstrapForm.Label className="fs-5">الكود الخاص بالطالب</BootstrapForm.Label>
                       <BootstrapForm.Control
                         type="text"
                         name="studentcodeinparent"
                         value={values.studentcodeinparent}
+                        placeholder="ادخل الكود الخاص بالطالب"
                         onChange={handleChange}
                         isInvalid={touched.studentcodeinparent && errors.studentcodeinparent}
                       />
@@ -142,12 +150,32 @@ const SignupParent = () => {
                       </BootstrapForm.Control.Feedback>
                     </BootstrapForm.Group>
 
+                    <Row>
+                      <Col md={6}>
+                        <BootstrapForm.Group className="mb-3">
+                          <BootstrapForm.Label className="fs-5">كود مدرسة الطالب</BootstrapForm.Label>
+                          <BootstrapForm.Control
+                            type="text"
+                            name="schoolCode"
+                            value={values.schoolCode}
+                            placeholder="ادخل كود المدرسة"
+                            onChange={handleChange}
+                            isInvalid={touched.schoolCode && errors.schoolCode}
+                          />
+                          <BootstrapForm.Control.Feedback type="invalid">
+                            {errors.schoolCode}
+                          </BootstrapForm.Control.Feedback>
+                        </BootstrapForm.Group>
+                      </Col>
+                    </Row>
+
                     <BootstrapForm.Group className="mb-3">
                       <BootstrapForm.Label className="fs-5">رقم الجوال</BootstrapForm.Label>
                       <BootstrapForm.Control
                         type="text"
                         name="phone"
                         value={values.phone}
+                        placeholder="ادخل رقم الجوال"
                         onChange={handleChange}
                         isInvalid={touched.phone && errors.phone}
                       />

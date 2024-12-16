@@ -32,6 +32,14 @@ import StudentGuide from './components/StudentGuide/StudentGuide.jsx';
 import TeacherGuide from './components/TeacherGuide/TeacherGuide.jsx';
 import ReadingClubEvaluation from './components/ReadingClubEvaluation/ReadingClubEvaluation.jsx';
 import ParentGuide from './components/ParentGuide/ParentGuide.jsx';
+import OneSchoolTeacherEvaluations from './components/OneSchoolTeacherEvaluations/OneSchoolTeacherEvaluations.jsx';
+import OneSchoolStusentEvaluations from './components/OneSchoolStusentEvaluations/OneSchoolStusentEvaluations.jsx';
+import OneSchoolParentEvaluations from './components/OneSchoolParentEvaluations/OneSchoolParentEvaluations.jsx';
+import Bookevaluations from './components/Bookevaluations/Bookevaluations.jsx';
+import Selfevaluations from './components/Selfevaluations/Selfevaluations.jsx';
+import Clubevaluations from './components/Clubevaluations/Clubevaluations.jsx';
+import AttendanceoneSchool from './components/AttendanceoneSchool/AttendanceoneSchool.jsx';
+import ReadingBooksNumberoneSchool from './components/ReadingBooksNumberoneSchool/ReadingBooksNumberoneSchool.jsx';
 
 export default function App() {
   const router = createBrowserRouter([
@@ -129,7 +137,39 @@ export default function App() {
           path: '/TeacherGuide', 
           element: <Protected><TeacherGuide /></Protected> 
         },
-
+        {
+          path: '/admin/OneSchoolTeacherEvaluations',
+          element: <Protected><OneSchoolTeacherEvaluations /></Protected>
+        },
+        {
+          path: '/admin/OneSchoolStusentEvaluations',
+          element: <Protected><OneSchoolStusentEvaluations /></Protected>
+        },
+        {
+          path: '/admin/OneSchoolParentEvaluations',
+          element: <Protected><OneSchoolParentEvaluations /></Protected>
+        }
+        ,{
+          path: '/admin/Bookevaluations',
+          element: <Protected><Bookevaluations /></Protected>
+        }
+        ,{
+          path: '/admin/Selfevaluations',
+          element: <Protected><Selfevaluations /></Protected>
+        }
+        ,{
+          path: '/admin/Clubevaluations',
+          element: <Protected><Clubevaluations /></Protected>
+        }
+        ,{
+          path: '/admin/AttendanceoneSchool',
+          element: <Protected><AttendanceoneSchool /></Protected>
+        }
+        ,{
+          path: '/admin/ReadingBooksNumberoneSchool',
+          element: <Protected><ReadingBooksNumberoneSchool /></Protected>
+        }
+        ,
         { 
           path: '*', 
           element: <Notfoundpage /> 

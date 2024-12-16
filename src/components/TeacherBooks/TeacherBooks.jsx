@@ -332,6 +332,7 @@ export default function TeacherBooks() {
         return {
           studentId: student._id,
           bookId: selectedBook._id,
+          schoolCode: student.schoolCode,
           ratings: {
             attendance: studentRating.attendance === 'نعم' ? true : false,
             readingSkills: {

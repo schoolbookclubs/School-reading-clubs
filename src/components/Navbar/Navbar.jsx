@@ -39,8 +39,11 @@ const MainNavbar = () => {
         return (
           <>
             <Nav.Link as={Link} to="/dashboard">لوحة التحكم</Nav.Link>
-            <Nav.Link as={Link} to="/teachers">المعلمين</Nav.Link>
-            <Nav.Link as={Link} to="/reports">التقارير</Nav.Link>
+            <Nav.Link as={Link} to="/admin/OneSchoolTeacherEvaluations">تقييم المعلمين</Nav.Link>
+            <Nav.Link as={Link} to="/admin/OneSchoolStusentEvaluations">تقييم الطلاب</Nav.Link>
+            <Nav.Link as={Link} to="/admin/OneSchoolParentEvaluations">تقييم اولياء الامور</Nav.Link>
+            <Nav.Link as={Link} to="/admin/AttendanceoneSchool">الحضور والغياب</Nav.Link>
+            <Nav.Link as={Link} to="/admin/ReadingBooksNumberoneSchool">عدد الكتب المقروءة</Nav.Link>
           </>
         );
       case 'ولي أمر':

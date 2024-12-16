@@ -216,16 +216,11 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
     );
   }
 
+
   return (
     <div className="book-rating-modal">
       <div className="modal-content">
-        <div className="reading-date">
-          <span>تاريخ القراءة: {new Date().toLocaleDateString('ar-EG', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}</span>
-        </div>
+        
 
         <h2 className='py-3 text-center'>تقييم كتاب {book.title}</h2>
 

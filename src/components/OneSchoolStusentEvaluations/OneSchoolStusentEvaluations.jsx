@@ -43,7 +43,7 @@ export default function OneSchoolStusentEvaluations() {
                   className={`evaluation-card ${card.className}`}
                   onClick={() => navigate(card.path)}
                 >
-                  <Card.Body className="card-body">
+                  <Card.Body className="card-body" style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                     {card.icon}
                     <Card.Title className="card-title">{card.title}</Card.Title>
                     <Card.Text className="card-text">

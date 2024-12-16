@@ -459,7 +459,7 @@ const StudentBag = () => {
                 <div className="section-icon">{section.icon}</div>
                 <Card.Title>{section.title}</Card.Title>
                 <Card.Text>{section.description}</Card.Text>
-                <Button variant="primary">اعرف المزيد</Button>
+                <Button variant="primary" className='mx-auto'>اعرف المزيد</Button>
               </Card.Body>
             </Card>
           </Col>

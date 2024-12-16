@@ -92,8 +92,24 @@ export default function ReadingClubEvaluation() {
   ];
 
   return (
-    <div className="reading-club-evaluation-container">
-      <div className="evaluation-card">
+    <div className="" style={{  display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+      fontFamily: 'Tajawal, sans-serif',
+      direction: 'rtl',
+      padding: '2rem'
+    }}>
+      <div className="" style={{ 
+    backgroundColor: 'white',
+    borderRadius: '20px',
+    boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
+    width: '100%',
+    maxWidth: '700px',
+    padding: '2.5rem',
+    animation: 'fadeIn 0.6s ease-out'
+    }}>
         {submissionStatus.success && (
           <div style={{
             backgroundColor: '#4CAF50',

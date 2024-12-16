@@ -114,7 +114,7 @@ export default function ProfileStudent() {
                     <div className="d-flex align-items-center">
                       <FaEnvelope className="me-3 text-primary" style={{ fontSize: '1.5rem' }} />
                       <div>
-                        <h6 className="mb-1 text-muted">البريد الإلكتروني</h6>
+                        <h6 className="mb-1 text-muted text-end">البريد الإلكتروني</h6>
                         <p className="mb-0">{studentData?.email || 'غير متوفر'}</p>
                       </div>
                     </div>

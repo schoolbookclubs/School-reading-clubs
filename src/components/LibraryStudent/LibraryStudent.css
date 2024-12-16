@@ -91,14 +91,14 @@
 }
 
 /* Loading Spinner */
-.loading-container {
+/* .loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-}
+} */
 
-.loading-spinner {
+/* .loading-spinner {
   text-align: center;
   animation: pulse 1.5s infinite;
 }
@@ -108,7 +108,7 @@
   color: #3498db;
   margin-bottom: 15px;
   animation: spin 1s linear infinite;
-}
+} */
 
 @keyframes spin {
   0% { transform: rotate(0deg); }

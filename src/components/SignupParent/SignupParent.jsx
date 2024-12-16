@@ -66,9 +66,7 @@ const SignupParent = () => {
           انشاء حساب ولي أمر جديد
           <i className="fas fa-user-plus"></i>
         </h2>
-        <div className="text-center mb-4">
-          <span role="img" aria-label="family" style={{ fontSize: '2rem' }}>👨‍👩‍👧‍👦</span>
-        </div>
+       
 
         {showAlert && (
           <div className={`alert ${alertVariant}`}>

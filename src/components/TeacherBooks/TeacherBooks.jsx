@@ -619,18 +619,19 @@ export default function TeacherBooks() {
         <Row xs={1} md={2} lg={3} className="g-4">
           {books.map((book) => (
             <Col key={book._id}>
-              <Card className="h-100 shadow-sm">
+              <Card className="shadow-sm">
                 <Card.Img 
                   variant="top" 
                   src={book.bookImage} 
                   style={{ 
-                    height: '250px', 
+                    width: '100%',
+                    height: '350px',
                     objectFit: 'cover' 
                   }} 
                 />
                 <Card.Body>
                   <Card.Title>{book.title}</Card.Title>
-                  <Card.Text>
+                  <Card.Text className="text-end">
                     <strong>المؤلف:</strong> {book.author}<br />
                     <strong>الرسام:</strong> {book.illustrator || 'غير محدد'}<br />
                     <strong>عدد الصفحات:</strong> {book.numberOfPages || 'غير محدد'}<br />

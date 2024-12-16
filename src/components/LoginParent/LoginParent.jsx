@@ -49,11 +49,9 @@ const LoginParent = () => {
         <h2 className="login-parent-title">
           
           تسجيل دخول ولي الأمر
-          <i className="fas fa-sign-in-alt"></i>
+          <i className="fas fa-user-plus"></i>
         </h2>
-        <div className="text-center mb-4">
-          <span role="img" aria-label="family" style={{ fontSize: '2rem' }}>👨‍👩‍👧‍👦</span>
-        </div>
+        
 
         {showAlert && (
           <div className={`alert ${alertVariant}`}>

@@ -695,9 +695,9 @@ export default function LibraryStudent() {
 
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner">
-          <FaSpinner className="spinner-icon" />
+      <div className="" style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <div className="" style={{textAlign: 'center',animation: 'pulse 1.5s infinite'}}>
+          <FaSpinner className="spinner-icon" style={{fontSize: '4rem', color: '#3498db', marginBottom: '15px', animation: 'spin 1s linear infinite'}} />
           <p>جارٍ تحميل الكتب...</p>
         </div>
       </div>
@@ -725,13 +725,13 @@ export default function LibraryStudent() {
               <div className="book-actions">
                 <button 
                   onClick={() => setSelectedBook(book)} 
-                  className="btn btn-success"
+                  className="btn btn-success p-0"
                 >
                   بطاقة تقييم الكتاب
                 </button>
                 <button 
                   onClick={() => setSelectedBookForSelfAssessment(book)} 
-                  className="btn btn-primary"
+                  className="btn btn-primary p-0"
                 >
                   التقييم الذاتي للطالب
                 </button>

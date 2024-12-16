@@ -50,10 +50,7 @@ const LoginTeacher = () => {
           تسجيل دخول المعلم
           <i className="fas fa-chalkboard-teacher"></i>
         </h2>
-        <div className="text-center mb-4">
-          <span role="img" aria-label="teacher" style={{ fontSize: '2rem' }}>👨‍🏫</span>
-        </div>
-
+        
         {showAlert && (
           <div className={`alert ${alertVariant}`}>
             {alertMessage}

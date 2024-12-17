@@ -67,7 +67,7 @@ const SignupParent = () => {
           <i className="fas fa-user-plus"></i>
         </h2>
        
-
+   
         {showAlert && (
           <div className={`alert ${alertVariant}`}>
             {alertMessage}

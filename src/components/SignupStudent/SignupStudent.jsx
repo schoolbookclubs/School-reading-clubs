@@ -21,7 +21,7 @@ const SignupStudent = () => {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/students/signup', values);
+      const response = await axios.post('https://school-book-clubs-backend.vercel.app/api/student/signup', values);
       setAlertVariant('success');
       setAlertMessage('تم إنشاء الحساب بنجاح');
       setShowAlert(true);
@@ -44,7 +44,9 @@ const SignupStudent = () => {
           انشاء حساب جديد للطالب
           <i className="fas fa-user-graduate"></i>
         </h2>
-        
+        {/* <div class="alert alert-warning" role="alert">
+          تنبية هام : عزيزي الطالب يجب عليك ادخال بريد الكتروني صالح موجود بالفعل حتي نتمكن من ارسال الكود الشخصي الخاص بك
+    </div> */}
         {showAlert && (
           <div className={`alert ${alertVariant}`}>
             {alertMessage}

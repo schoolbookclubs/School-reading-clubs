@@ -23,14 +23,15 @@ const SignupStudent = () => {
     try {
       const response = await axios.post('https://school-book-clubs-backend.vercel.app/api/student/signup', values);
       setAlertVariant('success');
-      setAlertMessage('تم إنشاء الحساب بنجاح');
+      setAlertMessage(response.data.message);
       setShowAlert(true);
       setTimeout(() => {
         navigate('/LoginStudent');
       }, 2000);
     } catch (error) {
       setAlertVariant('error');
-      setAlertMessage(error.response?.data?.message || 'حدث خطأ أثناء إنشاء الحساب');
+      console.log(error.response.data.message);
+      setAlertMessage(error.response.data.message || 'حدث خطأ أثناء إنشاء الحساب');
       setShowAlert(true);
     }
     setSubmitting(false);

@@ -1,10 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { DataContext } from '../../context/context.js';
 import { Container, Table, Row, Col, Form } from 'react-bootstrap';
-import './oneschoolteacher.css';
 
-export default function OneSchoolTeacherEvaluations() {
-  const { getTeacherRatings } = useContext(DataContext);
+export default function TeacherEvaluationsOfStudents() {
+  const { getTeacherRatingsforStudentsByteacherId } = useContext(DataContext);
   const [bookRatings, setBookRatings] = useState([]);
   const [selectedBook, setSelectedBook] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -13,7 +12,7 @@ export default function OneSchoolTeacherEvaluations() {
     const fetchRatings = async () => {
       setIsLoading(true);
       try {
-        const data = await getTeacherRatings();
+        const data = await getTeacherRatingsforStudentsByteacherId();
         if (data && data.bookRatings) {
           setBookRatings(data.bookRatings);
           if (data.bookRatings.length > 0) {
@@ -28,13 +27,13 @@ export default function OneSchoolTeacherEvaluations() {
     };
 
     fetchRatings();
-  }, [getTeacherRatings]);
+  }, [getTeacherRatingsforStudentsByteacherId]);
 
   if (isLoading) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <div className="loading-message">جاري تحميل تقييمات المعلمين...</div>
+        <div className="loading-message">جاري تحميل تقييمات المعلم...</div>
       </div>
     );
   }
@@ -68,13 +67,12 @@ export default function OneSchoolTeacherEvaluations() {
     return <div>لا توجد تقييمات متاحة</div>;
   }
 
-
   return (
     <Container fluid className="evaluation-container py-4">
       <Row className="justify-content-center mb-4">
         <Col xs={12} className="text-center">
           <h2 className="mb-4" style={{color: '#2c3e50', fontSize: '1.5rem'}}>
-            عرض تقييمات المعلمين للطلاب من خلال كتبهم
+            عرض تقييمات المعلم للطلاب من خلال كتاب
           </h2>
           <div className="d-flex justify-content-center align-items-center gap-3">
             <Form.Select 
@@ -106,7 +104,7 @@ export default function OneSchoolTeacherEvaluations() {
       </Row>
       <Row className="justify-content-center">
         <Col xs={12}>
-          <h1 className="text-center mb-4 evaluation-title">تقييمات المعلمين</h1>
+          <h1 className="text-center mb-4 evaluation-title">تقييمات المعلم</h1>
           <div className="table-responsive">
             <Table bordered hover className="evaluation-table">
               <thead>

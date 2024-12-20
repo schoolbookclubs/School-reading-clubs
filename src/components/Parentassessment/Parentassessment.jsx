@@ -20,6 +20,9 @@ const Parentassessment = () => {
 
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showIntroduction, setShowIntroduction] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState({ type: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const assessmentQuestions = [
     { 
@@ -80,7 +83,7 @@ const Parentassessment = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setIsSubmitting(true);
     try {
       // Prepare assessment data
       const assessmentData = {
@@ -111,7 +114,13 @@ const Parentassessment = () => {
       });
 
     } catch (error) {
-      console.error('Error submitting assessment:', error);
+      setModalMessage({
+        type: 'error',
+        message: error.response?.data?.message || 'حدث خطأ أثناء إرسال التقييم'
+      });
+      setShowModal(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -139,6 +148,8 @@ const Parentassessment = () => {
       </div>
     </div>
   );
+
+  const handleClose = () => setShowModal(false);
 
   return (
     <Container className="parent-assessment-container">
@@ -179,9 +190,13 @@ const Parentassessment = () => {
                         variant="primary" 
                         type="submit" 
                         className="submit-button"
-                        disabled={Object.values(ratings).some(rating => rating === null)}
+                        disabled={isSubmitting || Object.values(ratings).some(rating => rating === null)}
+                        style={{
+                          opacity: isSubmitting ? 0.7 : 1,
+                          cursor: isSubmitting ? 'not-allowed' : 'pointer'
+                        }}
                       >
-                        إرسال التقييم
+                        {isSubmitting ? 'جاري إرسال التقييم...' : 'إرسال التقييم'}
                       </Button>
                     </div>
                   </Form>
@@ -210,6 +225,35 @@ const Parentassessment = () => {
               >
                 إغلاق
               </Button>
+            </Modal.Body>
+          </Modal>
+
+          {/* Error Modal */}
+          <Modal 
+            show={showModal} 
+            onHide={handleClose}
+            centered
+            dir="rtl"
+          >
+            <Modal.Header 
+              style={{ 
+                backgroundColor: modalMessage.type === 'success' ? '#4CAF50' : '#f44336',
+                color: 'white',
+                border: 'none'
+              }}
+            >
+              <Modal.Title>
+                {modalMessage.type === 'success' ? 'عملية ناجحة' : 'فشل ارسال التقييم'}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body
+              style={{
+                padding: '20px',
+                fontSize: '1.1rem',
+                textAlign: 'center'
+              }}
+            >
+              {modalMessage.message}
             </Modal.Body>
           </Modal>
         </div>

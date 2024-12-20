@@ -75,59 +75,97 @@ export default function OneSchoolParentEvaluations() {
       <Container className="evaluation-container">
         <h1 className="evaluation-title">تقييمات أولياء الأمور</h1>
         <div className="table-responsive">
-          <Table className="evaluation-table" bordered hover>
+          <Table responsive bordered hover className="evaluation-table">
             <thead>
               <tr>
-                <th>اسم ولي الأمر</th>
-                <th>كود الطالب</th>
-                <th>السلوك العام</th>
-                <th>حماس القراءة</th>
-                <th>الاهتمامات القرائية</th>
-                <th>مهارات التواصل</th>
-                <th>المهارات الاجتماعية</th>
-                <th>المستوى الدراسي</th>
-                <th>التفكير النقدي</th>
-                <th>متوسط التقييم</th>
+                <th className="text-dark fw-bold" style={{ fontSize: '20px' }}>التقييمات</th>
+                {assessments.map((assessment) => (
+                  <th key={assessment._id} className="text-dark fw-bold" style={{ fontSize: '20px' }}>
+                    {assessment.parent.name}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {assessments.map((assessment) => (
-                <tr key={assessment.parent._id}>
-                  <td className="parent-name">{assessment.parent.name}</td>
-                  <td className="student-code">{assessment.parent.studentcodeinparent}</td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.generalBehavior)} text-center`}>
-                    {assessment.ratings.generalBehavior}/5
+              <tr>
+                <td>كود الطالب</td>
+                {assessments.map((assessment) => (
+                  <td key={assessment._id} className="student-code text-center">
+                    {assessment.parent.studentcodeinparent}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td>السلوك العام</td>
+                {assessments.map((assessment) => (
+                  <td key={assessment._id} className={`rating-cell ${getRatingClass(assessment.ratings.generalBehavior)} text-center`}>
+                    {assessment.ratings.generalBehavior}
                     <span className="rating-label">{translateRating('generalBehavior')}</span>
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.readingEnthusiasm)} text-center`}>
-                    {assessment.ratings.readingEnthusiasm}/5
+                ))}
+              </tr>
+              <tr>
+                <td>الشغف بالقراءة</td>
+                {assessments.map((assessment) => (
+                  <td key={assessment._id} className={`rating-cell ${getRatingClass(assessment.ratings.readingEnthusiasm)} text-center`}>
+                    {assessment.ratings.readingEnthusiasm}
                     <span className="rating-label">{translateRating('readingEnthusiasm')}</span>
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.readingInterests)} text-center`}>
-                    {assessment.ratings.readingInterests}/5
+                ))}
+              </tr>
+              <tr>
+                <td>الاهتمامات القرائية</td>
+                {assessments.map((assessment) => (
+                  <td key={assessment._id} className={`rating-cell ${getRatingClass(assessment.ratings.readingInterests)} text-center`}>
+                    {assessment.ratings.readingInterests}
                     <span className="rating-label">{translateRating('readingInterests')}</span>
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.communicationSkills)} text-center`}>
-                    {assessment.ratings.communicationSkills}/5
+                ))}
+              </tr>
+              <tr>
+                <td>مهارات التواصل</td>
+                {assessments.map((assessment) => (
+                  <td key={assessment._id} className={`rating-cell ${getRatingClass(assessment.ratings.communicationSkills)} text-center`}>
+                    {assessment.ratings.communicationSkills}
                     <span className="rating-label">{translateRating('communicationSkills')}</span>
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.socialSkills)} text-center`}>
-                    {assessment.ratings.socialSkills}/5
+                ))}
+              </tr>
+              <tr>
+                <td>المهارات الاجتماعية</td>
+                {assessments.map((assessment) => (
+                  <td key={assessment._id} className={`rating-cell ${getRatingClass(assessment.ratings.socialSkills)} text-center`}>
+                    {assessment.ratings.socialSkills}
                     <span className="rating-label">{translateRating('socialSkills')}</span>
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.academicPerformance)} text-center`}>
-                    {assessment.ratings.academicPerformance}/5
+                ))}
+              </tr>
+              <tr>
+                <td>الأداء الأكاديمي</td>
+                {assessments.map((assessment) => (
+                  <td key={assessment._id} className={`rating-cell ${getRatingClass(assessment.ratings.academicPerformance)} text-center`}>
+                    {assessment.ratings.academicPerformance}
                     <span className="rating-label">{translateRating('academicPerformance')}</span>
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.criticalThinking)} text-center`}>
-                    {assessment.ratings.criticalThinking}/5
+                ))}
+              </tr>
+              <tr>
+                <td>التفكير النقدي</td>
+                {assessments.map((assessment) => (
+                  <td key={assessment._id} className={`rating-cell ${getRatingClass(assessment.ratings.criticalThinking)} text-center`}>
+                    {assessment.ratings.criticalThinking}
                     <span className="rating-label">{translateRating('criticalThinking')}</span>
                   </td>
-                  <td className={`average-rating ${getRatingClass(assessment.averageRating)} text-center`}>
-                    {assessment.averageRating.toFixed(1)}/5
+                ))}
+              </tr>
+              <tr>
+                <td className="fw-bold">متوسط التقييم</td>
+                {assessments.map((assessment) => (
+                  <td key={assessment._id} className={`average-rating ${getRatingClass(assessment.averageRating)} text-center`}>
+                    {assessment.averageRating.toFixed(1)}
                   </td>
-                </tr>
-              ))}
+                ))}
+              </tr>
             </tbody>
           </Table>
         </div>

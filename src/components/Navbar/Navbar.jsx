@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Navbar as BootstrapNavbar, Nav, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { DataContext } from '../../context/context.js';
@@ -7,6 +7,27 @@ import './Navbar.css';
 const MainNavbar = () => {
   const { getUserRole, logout } = useContext(DataContext);
   const role = getUserRole();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const handleLinkClick = () => {
+    setIsDropdownOpen(false);
+  };
 
   const getNavItems = () => {
     if (!role) {
@@ -14,51 +35,90 @@ const MainNavbar = () => {
       return null;
     }
 
+    const renderMainLinks = (links) => {
+      return links.slice(0, 4).map((link, index) => (
+        <Nav.Link key={index} as={Link} to={link.to} onClick={handleLinkClick}>
+          {link.text}
+        </Nav.Link>
+      ));
+    };
+
+    const renderDropdownLinks = (links) => {
+      if (links.length <= 4) return null;
+      return (
+        <div ref={dropdownRef} style={{ position: 'relative' }}>
+          <div className="dropdown-toggle" onClick={toggleDropdown}>
+            المزيد
+          </div>
+          {isDropdownOpen && (
+            <div className="dropdown-menu">
+              {links.slice(4).map((link, index) => (
+                <Link
+                  key={index}
+                  to={link.to}
+                  onClick={handleLinkClick}
+                >
+                  {link.text}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    let links = [];
     switch (role) {
       case 'طالب':
-        return (
-          <>
-            <Nav.Link as={Link} to="/dashboard">لوحة التحكم</Nav.Link>
-            <Nav.Link as={Link} to="/ProfileStudent">الملف الشخصي</Nav.Link>
-            <Nav.Link as={Link} to="/LibraryStudent">الكتب والتقييم</Nav.Link>
-            <Nav.Link as={Link} to="/StudentBag">حقيبة القارئ</Nav.Link>
-            <Nav.Link as={Link} to="/StudentGuide">دليل الطالب</Nav.Link>
-            <Nav.Link as={Link} to="/ReadingClubEvaluation">تقييم نادي القراءة</Nav.Link>
-          </>
-        );
+        links = [
+          { to: '/dashboard', text: 'لوحة التحكم' },
+          { to: '/ProfileStudent', text: 'الملف الشخصي' },
+          { to: '/LibraryStudent', text: 'الكتب والتقييم' },
+          { to: '/StudentBag', text: 'حقيبة القارئ' },
+          { to: '/StudentGuide', text: 'دليل الطالب' },
+          { to: '/ReadingClubEvaluation', text: 'تقييم نادي القراءة' },
+          { to: '/Student_Rates', text: 'تقييمات الطالب' }
+        ];
+        break;
       case 'معلم':
-        return (
-          <>
-            <Nav.Link as={Link} to="/dashboard" className=''>الصفحة الرئيسية</Nav.Link>
-            <Nav.Link as={Link} to="/books">اضافة كتاب</Nav.Link>
-            <Nav.Link as={Link} to="/Teacherbooks">الكتب و التقييم</Nav.Link>
-            <Nav.Link as={Link} to="/TeacherGuide">دليل المعلم</Nav.Link>
-          </>
-        );
+        links = [
+          { to: '/dashboard', text: 'الصفحة الرئيسية' },
+          { to: '/books', text: 'اضافة كتاب' },
+          { to: '/Teacherbooks', text: 'الكتب و التقييم' },
+          { to: '/TeacherEvaluationsOfStudents', text: 'تقييمات المعلم للطلاب' },
+          { to: '/StudentReviewsofTeacherBooks', text: 'تقييمات الطلاب لكتب المعلم' },
+          { to: '/TeacherGuide', text: 'دليل المعلم' }
+        ];
+        break;
       case 'مشرف':
-        return (
-          <>
-            <Nav.Link as={Link} to="/dashboard">لوحة التحكم</Nav.Link>
-            <Nav.Link as={Link} to="/admin/OneSchoolTeacherEvaluations">تقييم المعلمين</Nav.Link>
-            <Nav.Link as={Link} to="/admin/OneSchoolStusentEvaluations">تقييم الطلاب</Nav.Link>
-            <Nav.Link as={Link} to="/admin/OneSchoolParentEvaluations">تقييم اولياء الامور</Nav.Link>
-            <Nav.Link as={Link} to="/admin/AttendanceoneSchool">الحضور والغياب</Nav.Link>
-            <Nav.Link as={Link} to="/admin/ReadingBooksNumberoneSchool">عدد الكتب المقروءة</Nav.Link>
-          </>
-        );
+        links = [
+          { to: '/dashboard', text: 'لوحة التحكم' },
+          { to: '/admin/OneSchoolTeacherEvaluations', text: 'تقييم المعلمين' },
+          { to: '/admin/OneSchoolStusentEvaluations', text: 'تقييم الطلاب' },
+          { to: '/admin/OneSchoolParentEvaluations', text: 'تقييم اولياء الامور' },
+          { to: '/admin/AttendanceoneSchool', text: 'الحضور والغياب' },
+          { to: '/admin/ReadingBooksNumberoneSchool', text: 'عدد الكتب المقروءة' }
+        ];
+        break;
       case 'ولي أمر':
-        return (
-          <>
-            <Nav.Link as={Link} to="/dashboard">لوحة التحكم</Nav.Link>
-            <Nav.Link as={Link} to="/Parentprofile">بياناتي الشخصية</Nav.Link>
-            <Nav.Link as={Link} to="/Parentassessment">تقييم ولي الامر</Nav.Link>
-            <Nav.Link as={Link} to="/ParentGuide">دليل ولي الامر</Nav.Link>
-          </>
-        );
+        links = [
+          { to: '/dashboard', text: 'لوحة التحكم' },
+          { to: '/Parentprofile', text: 'بياناتي الشخصية' },
+          { to: '/Parentassessment', text: 'تقييم ولي الامر' },
+          { to: '/ShowParentassessments', text: 'عرض التقييمات' },
+          { to: '/ParentGuide', text: 'دليل ولي الامر' }
+        ];
+        break;
       default:
-        console.warn(`Unhandled user role: ${role}`);
         return null;
     }
+
+    return (
+      <>
+        {renderMainLinks(links)}
+        {renderDropdownLinks(links)}
+      </>
+    );
   };
 
   return (

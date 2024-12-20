@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {jwtDecode} from 'jwt-decode';
+import { Modal } from 'react-bootstrap';
 import { submitReadingClubEvaluation } from '../../context/EvaluationContext';
 import './ReadingClubEvaluation.css';
 
@@ -13,10 +14,11 @@ export default function ReadingClubEvaluation() {
     booksToAddToNextList: ''
   });
 
-  const [submissionStatus, setSubmissionStatus] = useState({
-    success: false,
-    error: false
-  });
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState({ type: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleClose = () => setShowModal(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,16 +30,22 @@ export default function ReadingClubEvaluation() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem('token');
       const decodedToken = jwtDecode(token);
       const schoolCode = decodedToken.schoolCode;
 
-      await submitReadingClubEvaluation({
+      const response = await submitReadingClubEvaluation({
         ...formData,
         schoolCode
       });
-      setSubmissionStatus({ success: true, error: false });
+
+      setModalMessage({
+        type: 'success',
+        message: 'تم إرسال تقييمك بنجاح!'
+      });
+      setShowModal(true);
       
       // Reset form after successful submission
       setFormData({
@@ -49,18 +57,19 @@ export default function ReadingClubEvaluation() {
         booksToAddToNextList: ''
       });
 
-      // Hide success message after 3 seconds
+      // Hide modal after 2 seconds
       setTimeout(() => {
-        setSubmissionStatus({ success: false, error: false });
-      }, 3000);
+        setShowModal(false);
+      }, 2000);
 
     } catch (error) {
-      setSubmissionStatus({ success: false, error: true });
-      
-      // Hide error message after 3 seconds
-      setTimeout(() => {
-        setSubmissionStatus({ success: false, error: false });
-      }, 3000);
+      setModalMessage({
+        type: 'error',
+        message: error.response?.data?.message || 'حدث خطأ أثناء إرسال التقييم'
+      });
+      setShowModal(true);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -92,7 +101,8 @@ export default function ReadingClubEvaluation() {
   ];
 
   return (
-    <div className="" style={{  display: 'flex',
+    <div className="" style={{  
+      display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '100vh',
@@ -101,41 +111,43 @@ export default function ReadingClubEvaluation() {
       direction: 'rtl',
       padding: '2rem'
     }}>
+      <Modal 
+        show={showModal} 
+        onHide={handleClose}
+        centered
+        dir="rtl"
+      >
+        <Modal.Header 
+          style={{ 
+            backgroundColor: modalMessage.type === 'success' ? '#4CAF50' : '#f44336',
+            color: 'white',
+            border: 'none'
+          }}
+        >
+          <Modal.Title>
+            {modalMessage.type === 'success' ? 'عملية ناجحة' : 'فشل ارسال التقييم'}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body
+          style={{
+            padding: '20px',
+            fontSize: '1.1rem',
+            textAlign: 'center'
+          }}
+        >
+          {modalMessage.message}
+        </Modal.Body>
+      </Modal>
+
       <div className="" style={{ 
-    backgroundColor: 'white',
-    borderRadius: '20px',
-    boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
-    width: '100%',
-    maxWidth: '700px',
-    padding: '2.5rem',
-    animation: 'fadeIn 0.6s ease-out'
-    }}>
-        {submissionStatus.success && (
-          <div style={{
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            padding: '15px',
-            borderRadius: '10px',
-            textAlign: 'center',
-            marginBottom: '20px'
-          }}>
-            تم إرسال تقييمك بنجاح!
-          </div>
-        )}
-
-        {submissionStatus.error && (
-          <div style={{
-            backgroundColor: '#f44336',
-            color: 'white',
-            padding: '15px',
-            borderRadius: '10px',
-            textAlign: 'center',
-            marginBottom: '20px'
-          }}>
-            حدثت مشكلة أثناء إرسال التقييم
-          </div>
-        )}
-
+        backgroundColor: 'white',
+        borderRadius: '20px',
+        boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
+        width: '100%',
+        maxWidth: '700px',
+        padding: '2.5rem',
+        animation: 'fadeIn 0.6s ease-out'
+      }}>
         <h1 className="evaluation-title">تقييم نادي القراءة</h1>
         
         <form onSubmit={handleSubmit}>
@@ -150,12 +162,21 @@ export default function ReadingClubEvaluation() {
                 className="form-textarea"
                 placeholder="اكتب إجابتك هنا..."
                 required
+                disabled={isSubmitting}
               />
             </div>
           ))}
           
-          <button type="submit" className="submit-button">
-            إرسال التقييم
+          <button 
+            type="submit" 
+            className="submit-button"
+            disabled={isSubmitting}
+            style={{
+              opacity: isSubmitting ? 0.7 : 1,
+              cursor: isSubmitting ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {isSubmitting ? 'جاري إرسال التقييم...' : 'إرسال التقييم'}
           </button>
         </form>
       </div>

@@ -65,7 +65,7 @@ export default function AttendanceoneSchool() {
             <thead>
               <tr>
                 <th>اسم الطالب</th>
-                <th>الكودالمدرسي</th>
+                <th>كتاب المناقشة</th>
                 <th>حالة الحضور</th>
               </tr>
             </thead>
@@ -78,7 +78,7 @@ export default function AttendanceoneSchool() {
                       {record.student.name}
                     </div>
                   </td>
-                  <td className="book-title">{record.schoolCode}</td>
+                  <td className="book-title">{record.book.title}</td>
                   <td>
                     <span className={`attendance-status ${getAttendanceStatusClass(record.attended)}`}>
                       {record.attended === 'نعم' ? 'حاضر' : 'غائب'}

@@ -67,38 +67,59 @@ export default function Clubevaluations() {
       <Container className="evaluation-container">
         <h1 className="evaluation-title">تقييمات نادي القراءة المدرسي</h1>
         <div className="table-responsive">
-          <Table className="evaluation-table" bordered hover>
+          <Table responsive bordered hover className="evaluation-table">
             <thead>
               <tr>
-                <th>اسم الطالب</th>
-                <th>اسم النادي</th>
-                <th>كيف تغيرت نظرتك للقراءة بعد الانضمام للنادي؟</th>
-                <th>ما هو أكثر شيء استفدت منه في النادي؟</th>
-                <th>هل تشعر بتحسن في مهاراتك القرائية؟ كيف؟</th>
-                <th>أكثر شيء أعجبك في النادي</th>
-                <th>أكثر شيء لم يعجبك في النادي</th>
-                <th>ما الكتب التي قرأتها وتريد أن تضيفها إلى قائمة نادي القراءة القادم</th>
+                <th className='text-dark fw-bold' style={{ fontSize: '20px' }}>التقييمات</th>
+                {evaluations.map((evaluation) => (
+                  <th key={evaluation._id} className="student-name text-dark fw-bold" style={{ fontSize: '20px' }}>{evaluation.studentId.name}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {evaluations.map((evaluation) => (
-                <tr key={evaluation._id}>
-                  <td className="student-name">{evaluation.studentId.name}</td>
-                  <td className="club-name">نادي القراءة المدرسي</td>
-                  <td className="evaluation-text">{evaluation.readingPerspectiveChange}</td>
-                  <td className="evaluation-text">{evaluation.mostBeneficialAspect}</td>
-                  <td className="evaluation-text">{evaluation.readingSkillsImprovement}</td>
-                  <td className="evaluation-text">{evaluation.mostLikedAspect}</td>
-                  <td className="evaluation-text">{evaluation.leastLikedAspect}</td>
-                  <td>
+              <tr>
+                <td>كيف تغيرت نظرتك للقراءة بعد الانضمام للنادي؟</td>
+                {evaluations.map((evaluation) => (
+                  <td key={evaluation._id} className="evaluation-text">{evaluation.readingPerspectiveChange}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>ما هو أكثر شيء استفدت منه في النادي؟</td>
+                {evaluations.map((evaluation) => (
+                  <td key={evaluation._id} className="evaluation-text">{evaluation.mostBeneficialAspect}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>هل تشعر بتحسن في مهاراتك القرائية؟ كيف؟</td>
+                {evaluations.map((evaluation) => (
+                  <td key={evaluation._id} className="evaluation-text">{evaluation.readingSkillsImprovement}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>أكثر شيء أعجبك في النادي</td>
+                {evaluations.map((evaluation) => (
+                  <td key={evaluation._id} className="evaluation-text">{evaluation.mostLikedAspect}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>أكثر شيء لم يعجبك في النادي</td>
+                {evaluations.map((evaluation) => (
+                  <td key={evaluation._id} className="evaluation-text">{evaluation.leastLikedAspect}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>ما الكتب التي قرأتها وتريد أن تضيفها إلى قائمة نادي القراءة القادم</td>
+                {evaluations.map((evaluation) => (
+                  <td key={evaluation._id}>
                     <ul className="books-list">
                       {evaluation.booksToAddToNextList.map((book, index) => (
                         <li key={index}>{book}</li>
                       ))}
                     </ul>
                   </td>
-                </tr>
-              ))}
+                ))}
+              </tr>
+             
             </tbody>
           </Table>
         </div>

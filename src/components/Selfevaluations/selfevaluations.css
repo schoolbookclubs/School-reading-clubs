@@ -49,7 +49,7 @@
 
 .evaluation-table tbody tr:hover {
   background-color: #fff9f2;
-  transform: scale(1.01);
+  /* transform: scale(1.01); */
 }
 
 .rating-cell {

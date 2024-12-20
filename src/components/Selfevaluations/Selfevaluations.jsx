@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Container, Table } from 'react-bootstrap';
+import { Container, Table, Form } from 'react-bootstrap';
 import { DataContext } from '../../context/context';
 import './selfevaluations.css';
 
@@ -7,6 +7,8 @@ export default function Selfevaluations() {
   const { getStudentSelfAssessments } = useContext(DataContext);
   const [assessments, setAssessments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [books, setBooks] = useState([]);
+  const [selectedBook, setSelectedBook] = useState('');
 
   useEffect(() => {
     const fetchAssessments = async () => {
@@ -15,6 +17,14 @@ export default function Selfevaluations() {
         const response = await getStudentSelfAssessments();
         if (response && Array.isArray(response.assessments)) {
           setAssessments(response.assessments);
+          // Extract unique books from assessments
+          const uniqueBooks = [...new Map(response.assessments.map(assessment => 
+            [assessment.book._id, assessment.book]
+          )).values()];
+          setBooks(uniqueBooks);
+          if (uniqueBooks.length > 0) {
+            setSelectedBook(uniqueBooks[0]._id);
+          }
         } else {
           console.error('Invalid data format received:', response);
           setAssessments([]);
@@ -37,19 +47,9 @@ export default function Selfevaluations() {
     return 'rating-poor';
   };
 
-  const translateRatingField = (field) => {
-    const translations = {
-      enjoyedReading: 'استمتعت بالقراءة',
-      readUsefulBooks: 'قرأت كتباً مفيدة',
-      madeNewFriends: 'تعرفت على أصدقاء جدد',
-      conversationsImprovedUnderstanding: 'زادت الحوارات من فهمي للكتب',
-      expressedOpinionFreely: 'أستطعت التعبير عن رأيي بحرية',
-      increasedSelfConfidence: 'زادت ثقتي بنفسي',
-      wouldEncourageClassmates: 'سوف أشجع زملائي على الانضمام لنادي قراءة',
-      willJoinNextYear: 'سوف أنضم لنادي القراءة السنة القادمة'
-    };
-    return translations[field] || field;
-  };
+  const filteredAssessments = selectedBook
+    ? assessments.filter(assessment => assessment.book._id === selectedBook)
+    : assessments;
 
   if (isLoading) {
     return (
@@ -75,57 +75,119 @@ export default function Selfevaluations() {
     <div className="self-evaluations">
       <Container className="evaluation-container">
         <h1 className="evaluation-title">التقييمات الذاتية للطلاب</h1>
+
+        <Form.Group className="mb-4">
+          <Form.Label className="text-dark">اختر الكتاب:</Form.Label>
+          <Form.Select
+            value={selectedBook}
+            onChange={(e) => setSelectedBook(e.target.value)}
+            className="mb-3"
+          >
+            {books.map((book) => (
+              <option key={book._id} value={book._id}>
+                {book.title}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+
         <div className="table-responsive">
           <Table className="evaluation-table" bordered hover>
             <thead>
               <tr>
-                <th>اسم الطالب</th>
-                <th>عنوان الكتاب</th>
-                <th>استمتعت بالقراءة</th>
-                <th>قرأت كتباً مفيدة</th>
-                <th>كونت صداقات جديدة</th>
-                <th>المناقشات حسنت فهمي</th>
-                <th>عبرت عن رأيي بحرية</th>
-                <th>زادت ثقتي بنفسي</th>
-                <th>سأشجع زملائي</th>
-                <th>سأشارك العام القادم</th>
-                <th>معدل التقييم</th>
+                <th className='text-dark' rowSpan="2">معايير التقييم</th>
+                <th style={{textAlign: 'center'}} className='text-dark ' colSpan={filteredAssessments.length}>اسم الطالب</th>
+              </tr>
+              <tr>
+                {filteredAssessments.map((assessment) => (
+                  <th key={`student-${assessment.student._id}`} className='text-dark text-center'>
+                    {assessment.student.name}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {assessments.map((assessment) => (
-                <tr key={`${assessment.student._id}-${assessment.book._id}`}>
-                  <td>{assessment.student.name}</td>
-                  <td>{assessment.book.title}</td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.enjoyedReading)}`}>
-                    {assessment.ratings.enjoyedReading}/5
+              <tr>
+                <td>عنوان الكتاب</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`book-${assessment.book._id}`}>{assessment.book.title}</td>
+                ))}
+              </tr>
+              <tr>
+                <td>استمتعت بالقراءة</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`reading-${assessment.student._id}`} className={`rating-cell ${getRatingClass(assessment.ratings.enjoyedReading)}`}>
+                    {assessment.ratings.enjoyedReading}
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.readUsefulBooks)}`}>
-                    {assessment.ratings.readUsefulBooks}/5
+                ))}
+              </tr>
+              <tr>
+                <td>قرأت كتباً مفيدة</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`useful-${assessment.student._id}`} className={`rating-cell ${getRatingClass(assessment.ratings.readUsefulBooks)}`}>
+                    {assessment.ratings.readUsefulBooks}
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.madeNewFriends)}`}>
-                    {assessment.ratings.madeNewFriends}/5
+                ))}
+              </tr>
+              <tr>
+                <td>كونت صداقات جديدة</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`friends-${assessment.student._id}`} className={`rating-cell ${getRatingClass(assessment.ratings.madeNewFriends)}`}>
+                    {assessment.ratings.madeNewFriends}
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.conversationsImprovedUnderstanding)}`}>
-                    {assessment.ratings.conversationsImprovedUnderstanding}/5
+                ))}
+              </tr>
+              <tr>
+                <td>المناقشات حسنت فهمي</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`understanding-${assessment.student._id}`} className={`rating-cell ${getRatingClass(assessment.ratings.conversationsImprovedUnderstanding)}`}>
+                    {assessment.ratings.conversationsImprovedUnderstanding}
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.expressedOpinionFreely)}`}>
-                    {assessment.ratings.expressedOpinionFreely}/5
+                ))}
+              </tr>
+              <tr>
+                <td>عبرت عن رأيي بحرية</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`opinion-${assessment.student._id}`} className={`rating-cell ${getRatingClass(assessment.ratings.expressedOpinionFreely)}`}>
+                    {assessment.ratings.expressedOpinionFreely}
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.increasedSelfConfidence)}`}>
-                    {assessment.ratings.increasedSelfConfidence}/5
+                ))}
+              </tr>
+              <tr>
+                <td>زادت ثقتي بنفسي</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`confidence-${assessment.student._id}`} className={`rating-cell ${getRatingClass(assessment.ratings.increasedSelfConfidence)}`}>
+                    {assessment.ratings.increasedSelfConfidence}
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.wouldEncourageClassmates)}`}>
-                    {assessment.ratings.wouldEncourageClassmates}/5
+                ))}
+              </tr>
+              <tr>
+                <td>سأشجع زملائي</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`encourage-${assessment.student._id}`} className={`rating-cell ${getRatingClass(assessment.ratings.wouldEncourageClassmates)}`}>
+                    {assessment.ratings.wouldEncourageClassmates}
                   </td>
-                  <td className={`rating-cell ${getRatingClass(assessment.ratings.willJoinNextYear)}`}>
-                    {assessment.ratings.willJoinNextYear}/5
+                ))}
+              </tr>
+              <tr>
+                <td>سأشارك العام القادم</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`nextYear-${assessment.student._id}`} className={`rating-cell ${getRatingClass(assessment.ratings.willJoinNextYear)}`}>
+                    {assessment.ratings.willJoinNextYear}
                   </td>
-                  <td className={`average-rating ${getRatingClass(assessment.averageRating)}`}>
-                    {assessment.averageRating.toFixed(1)}/5
+                ))}
+              </tr>
+              <tr>
+                <td className='text-danger'>معدل التقييم</td>
+                {filteredAssessments.map((assessment) => (
+                  <td key={`average-${assessment.student._id}`} className={`average-rating ${getRatingClass(assessment.averageRating)} text-danger`}>
+                    {assessment.averageRating.toFixed(1)}
                   </td>
-                </tr>
-              ))}
+                ))}
+              </tr>
+              <tr>
+               
+              </tr>
             </tbody>
           </Table>
         </div>

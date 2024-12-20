@@ -40,7 +40,15 @@ import Selfevaluations from './components/Selfevaluations/Selfevaluations.jsx';
 import Clubevaluations from './components/Clubevaluations/Clubevaluations.jsx';
 import AttendanceoneSchool from './components/AttendanceoneSchool/AttendanceoneSchool.jsx';
 import ReadingBooksNumberoneSchool from './components/ReadingBooksNumberoneSchool/ReadingBooksNumberoneSchool.jsx';
-
+import TeacherEvaluationsOfStudents from './components/TeacherEvaluationsOfStudents/TeacherEvaluationsOfStudents.jsx';
+import Student_Rates from './components/StudentRates/Student_Rates.jsx';
+import Student_SchoolBookRatings from './components/StudentRates/Student_SchoolBookRatings.jsx';
+import Student_SelfAssessments from './components/StudentRates/Student_SelfAssessments.jsx';
+import Student_ReadingClubRatings from './components/StudentRates/Student_ReadingClubRatings';
+import ShowParentassessments from './components/Parentassessment/ShowParentassessments.jsx';
+import StudentReviewsofTeacherBooks from './components/StudentReviewsofTeacherBooks/StudentReviewsofTeacherBooks.jsx';
+import Show_Student_SchoolBookRatings from './components/StudentReviewsofTeacherBooks/Show_Student_SchoolBookRatings.jsx';
+import Show_Student_SelfAssessments from './components/StudentReviewsofTeacherBooks/Show_Student_SelfAssessments.jsx';
 export default function App() {
   const router = createBrowserRouter([
     {
@@ -169,7 +177,43 @@ export default function App() {
           path: '/admin/ReadingBooksNumberoneSchool',
           element: <Protected><ReadingBooksNumberoneSchool /></Protected>
         }
+        ,{
+          path: '/TeacherEvaluationsOfStudents',
+          element: <Protected><TeacherEvaluationsOfStudents /></Protected>
+        }
+        ,{
+          path: '/Student_Rates',
+          element: <Protected><Student_Rates /></Protected>
+        }
         ,
+        {
+          path: '/Student_SchoolBookRatings',
+          element: <Protected><Student_SchoolBookRatings /></Protected>
+        },
+        {
+          path: '/Student_SelfAssessments',
+          element: <Protected><Student_SelfAssessments /></Protected>
+        },
+        {
+          path: '/Student_ReadingClubRatings',
+          element: <Protected><Student_ReadingClubRatings /></Protected>
+        },
+        {
+          path: '/ShowParentassessments',
+          element: <Protected><ShowParentassessments /></Protected>
+        },
+        {
+          path: '/StudentReviewsofTeacherBooks',
+          element: <Protected><StudentReviewsofTeacherBooks /></Protected>
+        },
+        {
+          path: '/Show_Student_SchoolBookRatings',
+          element: <Protected><Show_Student_SchoolBookRatings /></Protected>
+        },
+        {
+          path: '/Show_Student_SelfAssessments',
+          element: <Protected><Show_Student_SelfAssessments /></Protected>
+        },
         { 
           path: '*', 
           element: <Notfoundpage /> 

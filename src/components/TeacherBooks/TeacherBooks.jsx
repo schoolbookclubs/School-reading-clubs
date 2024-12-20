@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Row, Col, Card, Button, Modal, Table, Form, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Modal, Table, Form, Spinner, Toast } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { DataContext } from '../../context/context.js';
 import "./TeacherBooks.css"
+
 export default function TeacherBooks() {
   const { fetchTeacherBooks, deleteBook, updateBook, fetchStudentsBySchoolCode, rateStudent } = useContext(DataContext);
   const [books, setBooks] = useState([]);
@@ -11,12 +12,25 @@ export default function TeacherBooks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Toast notification states
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastVariant, setToastVariant] = useState('success');
+
   // Modals and editing states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
+
+  // State for storing ratings per book
+  const [bookRatings, setBookRatings] = useState({});
+
+  // Notification Modal state
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
+  const [notificationVariant, setNotificationVariant] = useState('success');
 
   // Validation schema for book update
   const bookUpdateSchema = Yup.object().shape({
@@ -112,13 +126,7 @@ export default function TeacherBooks() {
 
   // Updated skills array with comprehensive rating options
   const evaluationCriteria = [
-    // Attendance Skill
-    {
-      id: 'attendanceHeader',
-      name: 'الحضور',
-      type: 'header',
-      category: 'attendance'
-    },
+   
     {
       id: 'attendance',
       name: 'الحضور',
@@ -259,27 +267,11 @@ export default function TeacherBooks() {
     }
   ];
 
-  // Initialize student ratings with default values
+  // Initialize student ratings with empty values
   const initializeStudentRatings = () => {
     const defaultRatings = {};
     students.forEach(student => {
-      defaultRatings[student._id] = {
-        attendance: 'لا',
-        completeReading: 1,
-        deepUnderstanding: 1,
-        personalReflection: 1,
-        confidenceExpression: 1,
-        creativeIdeas: 1,
-        lifeConnectionThinking: 1,
-        independentThinking: 1,
-        clearCommunication: 1,
-        activeListening: 1,
-        constructiveInteraction: 1,
-        activeParticipation: 1,
-        respectDiversity: 1,
-        buildingFriendships: 1,
-        collaboration: 1
-      };
+      defaultRatings[student._id] = {};  // Empty object for each student
     });
     return defaultRatings;
   };
@@ -287,26 +279,43 @@ export default function TeacherBooks() {
   // State for student ratings
   const [studentRatings, setStudentRatings] = useState(initializeStudentRatings());
 
-  // Updated function to handle student ratings
-  const updateStudentRating = (studentId, skillId, value) => {
-    // Ensure we're using the correct student object
-    const student = students.find(s => s.id === studentId || s._id === studentId);
-    
-    if (!student) {
-      console.error('Student not found:', studentId);
-      return;
-    }
+  // Reset ratings when changing books
+  const handleBookSelect = (book) => {
+    setSelectedBook(book);
+    setStudentRatings({}); // Reset all student ratings when selecting a new book
+  };
 
-    // Use the correct student ID
+  // Update handleRatingChange to store ratings per book
+  const handleRatingChange = (student, skillId, value) => {
     const correctStudentId = student._id || student.id;
-
-    setStudentRatings(prevRatings => ({
-      ...prevRatings,
-      [correctStudentId]: {
-        ...(prevRatings[correctStudentId] || {}),
-        [skillId]: value
-      }
-    }));
+    
+    // تحويل القيمة إلى رقم إذا كانت قيمة عددية وليست "اختر"
+    const processedValue = value === "اختر" ? undefined : 
+                         skillId === 'attendance' ? value : 
+                         parseInt(value);
+    
+    if (processedValue === undefined) {
+      // إذا تم اختيار "اختر"، نزيل القيمة من التقييمات
+      setStudentRatings(prevRatings => {
+        const newRatings = {
+          ...prevRatings,
+          [correctStudentId]: {
+            ...(prevRatings[correctStudentId] || {})
+          }
+        };
+        delete newRatings[correctStudentId][skillId];
+        return newRatings;
+      });
+    } else {
+      // إذا تم اختيار قيمة حقيقية، نضيفها للتقييمات
+      setStudentRatings(prevRatings => ({
+        ...prevRatings,
+        [correctStudentId]: {
+          ...(prevRatings[correctStudentId] || {}),
+          [skillId]: processedValue
+        }
+      }));
+    }
   };
 
   // Add new state for loading and success
@@ -320,89 +329,122 @@ export default function TeacherBooks() {
     message: ''
   });
 
-  // New function to submit all ratings
-  const submitAllRatings = async () => {
-    setIsRatingSubmitting(true);
-    
+  // Function to show notification
+  const showNotification = (message, variant) => {
+    setNotificationMessage(message);
+    setNotificationVariant(variant);
+    setShowNotificationModal(true);
+  };
+
+  // Handle rating submission
+  const handleRatingSubmit = async (ratings) => {
+    if (!selectedBook || !selectedStudent) return;
+
     try {
-      // Prepare ratings for all students
-      const allRatings = students.map(student => {
-        const studentRating = studentRatings[student._id] || {};
-        
-        return {
-          studentId: student._id,
-          bookId: selectedBook._id,
-          schoolCode: student.schoolCode,
-          ratings: {
-            attendance: studentRating.attendance === 'نعم' ? true : false,
-            readingSkills: {
-              completeReading: studentRating.completeReading || 1,
-              deepUnderstanding: studentRating.deepUnderstanding || 1,
-              personalReflection: studentRating.personalReflection || 1,
-            },
-            confidence: studentRating.confidenceExpression || 1,
-            criticalThinking: {
-              creativeIdeas: studentRating.creativeIdeas || 1,
-              lifeConnectionThinking: studentRating.lifeConnectionThinking || 1,
-              independentThinking: studentRating.independentThinking || 1
-            },
-            communicationSkills: {
-              clearCommunication: studentRating.clearCommunication || 1,
-              activeListening: studentRating.activeListening || 1,
-              constructiveInteraction: studentRating.constructiveInteraction || 1
-            },
-            socialSkills: {
-              activeParticipation: studentRating.activeParticipation || 1,
-              respectDiversity: studentRating.respectDiversity || 1,
-              buildingFriendships: studentRating.buildingFriendships || 1
-            },
-            generalBehavior: {
-              collaboration: studentRating.collaboration || 1
-            }
-          }
-        };
-      });
+      const ratingData = {
+        bookId: selectedBook._id,
+        ratings: {
+          audience: ratings.audience || 'لا',
+          completeReading: ratings.completeReading || 1,
+          deepUnderstanding: ratings.deepUnderstanding || 1,
+          personalReflection: ratings.personalReflection || 1,
+          confidence: ratings.confidence || 1,
+          creativeIdeas: ratings.creativeIdeas || 1,
+          connectingExperiences: ratings.connectingExperiences || 1,
+          independentThinking: ratings.independentThinking || 1,
+          clearExpression: ratings.clearExpression || 1,
+          activeListening: ratings.activeListening || 1,
+          constructiveFeedback: ratings.constructiveFeedback || 1,
+          activeParticipation: ratings.activeParticipation || 1,
+          respectingDiversity: ratings.respectingDiversity || 1,
+          buildingFriendships: ratings.buildingFriendships || 1,
+          collaboration: ratings.collaboration || 1
+        }
+      };
 
-      // Log ratings for debugging
-      console.log('Submitting Ratings:', JSON.stringify(allRatings, null, 2));
+      const response = await rateStudent([selectedStudent], ratingData);
+      showNotification(response.message, 'success');
+      
+      // إغلاق النافذة وإعادة تعيين الحالة
+      setShowRatingModal(false);
+      setSelectedBook(null);
+      setSelectedStudent(null);
+      setStudentRatings({});
+    } catch (error) {
+      if (error.ratedStudents) {
+        // عرض رسالة عن الطلاب المقيمين مسبقاً
+        showNotification(error.message, 'danger');
+      } else {
+        // عرض رسالة الخطأ العامة
+        showNotification(error.message, 'danger');
+      }
+    }
+  };
 
-      // Submit ratings for all students
-      const results = await Promise.all(
-        allRatings.map(rating => {
-          // Validate student ID before submission
-          if (!rating.studentId) {
-            console.error('Invalid student ID:', rating);
-            return Promise.resolve(false);
-          }
-          return rateStudent(rating.studentId, rating);
-        })
+  // Submit all ratings for multiple students
+  const submitAllRatings = async () => {
+    if (!selectedBook || Object.keys(studentRatings).length === 0) return;
+
+    // Validate that all students have all required ratings
+    const hasEmptyRatings = students.some(student => {
+      const studentRating = studentRatings[student._id] || {};
+      return evaluationCriteria
+        .filter(criteria => criteria.type === 'rating' || criteria.type === 'attendance')
+        .some(criteria => !studentRating[criteria.id] || studentRating[criteria.id] === "اختر");
+    });
+
+    if (hasEmptyRatings) {
+      showNotification('يجب تقييم جميع المهارات لكل طالب', 'warning');
+      return;
+    }
+
+    setIsRatingSubmitting(true);
+    try {
+      const ratedStudentIds = Object.keys(studentRatings).filter(studentId => 
+        Object.keys(studentRatings[studentId]).length > 0
       );
 
-      // Check if all submissions were successful
-      const allSuccessful = results.every(result => result);
-
-      // Set submission result
-      setSubmissionResult({
-        show: true,
-        success: allSuccessful,
-        message: allSuccessful 
-          ? 'تم تسجيل التقييمات بنجاح' 
-          : 'حدث خطأ أثناء تسجيل بعض التقييمات'
-      });
-
-      // Close modal if successful
-      if (allSuccessful) {
-        setShowRatingModal(false);
+      if (ratedStudentIds.length === 0) {
+        showNotification('لم يتم اختيار أي طالب للتقييم', 'warning');
+        return;
       }
-    } catch (error) {
-      console.error('Error submitting ratings:', error);
+
+      // إرسال التقييم لكل طالب على حدة
+      for (const studentId of ratedStudentIds) {
+        const ratingData = {
+          bookId: selectedBook._id,
+          ratings: {
+            attendance: studentRatings[studentId]?.attendance || 'لا',
+            completeReading: studentRatings[studentId]?.completeReading || 1,
+            deepUnderstanding: studentRatings[studentId]?.deepUnderstanding || 1,
+            personalReflection: studentRatings[studentId]?.personalReflection || 1,
+            confidenceExpression: studentRatings[studentId]?.confidenceExpression || 1,
+            creativeIdeas: studentRatings[studentId]?.creativeIdeas || 1,
+            lifeConnectionThinking: studentRatings[studentId]?.lifeConnectionThinking || 1,
+            independentThinking: studentRatings[studentId]?.independentThinking || 1,
+            clearCommunication: studentRatings[studentId]?.clearCommunication || 1,
+            activeListening: studentRatings[studentId]?.activeListening || 1,
+            constructiveInteraction: studentRatings[studentId]?.constructiveInteraction || 1,
+            activeParticipation: studentRatings[studentId]?.activeParticipation || 1,
+            respectDiversity: studentRatings[studentId]?.respectDiversity || 1,
+            buildingFriendships: studentRatings[studentId]?.buildingFriendships || 1,
+            collaboration: studentRatings[studentId]?.collaboration || 1
+          }
+        };
+
+        const response = await rateStudent(studentId, ratingData);
+        showNotification(response.message, 'success');
+      }
       
-      // Set error submission result
-      setSubmissionResult({
-        show: true,
-        success: false,
-        message: error.message || 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى'
-      });
+      setShowRatingModal(false);
+      setSelectedBook(null);
+      setStudentRatings({});
+    } catch (error) {
+      if (error.ratedStudents) {
+        showNotification(error.message, 'danger');
+      } else {
+        showNotification(error.message, 'danger');
+      }
     } finally {
       setIsRatingSubmitting(false);
     }
@@ -467,6 +509,12 @@ export default function TeacherBooks() {
     );
   };
 
+  // Update the openRatingModal function
+  const openRatingModal = (book) => {
+    handleBookSelect(book);
+    setShowRatingModal(true);
+  };
+
   // Render rating modal with a traditional table
   const renderRatingModal = () => {
     return (
@@ -478,8 +526,10 @@ export default function TeacherBooks() {
           centered 
           dialogClassName="rating-modal"
         >
-          <Modal.Header  className="bg-primary text-white text-center">
-            <Modal.Title className='text-center'>تقييم أداء الطلاب</Modal.Title>
+          <Modal.Header className="bg-primary text-white text-center">
+            <Modal.Title className='text-center w-100'>
+              تقييم أداء الطلاب - {selectedBook?.title}
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body className="d-flex justify-content-center">
             <div className="table-responsive" style={{width: '95%'}}>
@@ -496,44 +546,13 @@ export default function TeacherBooks() {
                   {evaluationCriteria.map((skill) => (
                     <tr key={skill.id}>
                       {skill.type === 'header' ? (
-                        <td colSpan={students.length + 1} className="bg-light font-weight-bold text-right">{skill.name}</td>
+                        <td colSpan={students.length + 1} className="bg-light fw-bold text-right">{skill.name}</td>
                       ) : (
                         <>
                           <td className="font-weight-bold text-right">{skill.name}</td>
                           {students.map((student) => (
-                            <td key={student._id}>
-                              {skill.type === 'attendance' ? (
-                                <Form.Select
-                                  size="sm"
-                                  value={studentRatings[student._id]?.[skill.id] || 'لا'}
-                                  onChange={(e) => updateStudentRating(student._id, skill.id, e.target.value)}
-                                  className="text-center"
-                                >
-                                  <option value="لا">لا</option>
-                                  <option value="نعم">نعم</option>
-                                </Form.Select>
-                              ) : skill.type === 'boolean' ? (
-                                <Form.Check
-                                  type="checkbox"
-                                  checked={studentRatings[student._id]?.[skill.id] || false}
-                                  onChange={(e) => updateStudentRating(student._id, skill.id, e.target.checked)}
-                                  className="text-center"
-                                />
-                              ) : (
-                                <Form.Control
-                                  as="select"
-                                  size="sm"
-                                  value={studentRatings[student._id]?.[skill.id] || 1}
-                                  onChange={(e) => updateStudentRating(student._id, skill.id, e.target.value)}
-                                  className="text-center"
-                                >
-                                  {[1, 2, 3, 4, 5].map((rating) => (
-                                    <option key={rating} value={rating}>
-                                      {rating}
-                                    </option>
-                                  ))}
-                                </Form.Control>
-                              )}
+                            <td className='w-25' key={student._id}>
+                              {renderRatingSelect(student, skill)}
                             </td>
                           ))}
                         </>
@@ -554,7 +573,7 @@ export default function TeacherBooks() {
             <Button 
               variant="primary" 
               onClick={submitAllRatings}
-              disabled={isRatingSubmitting}
+              disabled={isRatingSubmitting || Object.keys(studentRatings).length === 0 || !Object.values(studentRatings).some(ratings => Object.keys(ratings).length > 0)}
             >
               {isRatingSubmitting ? <Spinner animation="border" size="sm" /> : 'حفظ التقييمات'}
             </Button>
@@ -594,14 +613,95 @@ export default function TeacherBooks() {
           <span className="visually-hidden">جاري التحميل...</span>
         </div>
         <h4 className="mt-3 text-primary">
-          <i className="fas fa-book me-2"></i>
+          
           جاري تحميل كتبك...
+          <i className="fas fa-book me-2"></i>
         </h4>
         <p className="text-muted">يرجى الانتظار قليلاً</p>
       </div>
     </div>
   );
   if (error) return <div className="text-danger">{error}</div>;
+
+  // Render book cards
+  const renderBookCards = () => {
+    return books.map((book) => (
+      <Col key={book._id} md={4} className="mb-4">
+        <Card className="h-100">
+          <Card.Img 
+            variant="top" 
+            src={book.bookImage} 
+            alt={book.title}
+            style={{ height: '350px', width: '100%', objectFit: 'cover' }}
+          />
+          <Card.Body>
+            <Card.Title>{book.title}</Card.Title>
+            <Card.Text>
+              المؤلف: {book.author}<br />
+              {book.illustrator && <>الرسام: {book.illustrator}<br /></>}
+              عدد الصفحات: {book.numberOfPages}<br />
+              تاريخ المناقشة: {new Date(book.Discussiondate).toLocaleDateString('ar-EG')}
+            </Card.Text>
+            <div className="d-flex justify-content-between">
+              <Button 
+                variant="primary" 
+                onClick={() => openRatingModal(book)}
+              >
+                تقييم الطلاب
+              </Button>
+              <Button 
+                variant="warning" 
+                onClick={() => {
+                  setSelectedBook(book);
+                  setShowUpdateModal(true);
+                }}
+              >
+                تعديل
+              </Button>
+              <Button 
+                variant="danger" 
+                onClick={() => {
+                  setSelectedBook(book);
+                  setShowDeleteModal(true);
+                }}
+              >
+                حذف
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+    ));
+  };
+
+  // تحديث جزء عرض التقييمات في Modal
+  const renderRatingSelect = (student, skill) => {
+    const value = studentRatings[student._id]?.[skill.id] || "اختر";
+    
+    return (
+      <Form.Control
+        as="select"
+        size="sm"
+        value={value}
+        onChange={(e) => handleRatingChange(student, skill.id, e.target.value)}
+        className="text-center"
+      >
+        <option value="اختر">اختر</option>
+        {skill.id === 'attendance' ? (
+          <>
+            <option value="نعم">نعم</option>
+            <option value="لا">لا</option>
+          </>
+        ) : (
+          [1, 2, 3, 4, 5].map((rating) => (
+            <option key={rating} value={rating}>
+              {rating}
+            </option>
+          ))
+        )}
+      </Form.Control>
+    );
+  };
 
   return (
     <Container className="py-5">
@@ -617,62 +717,7 @@ export default function TeacherBooks() {
         </div>
       ) : (
         <Row xs={1} md={2} lg={3} className="g-4">
-          {books.map((book) => (
-            <Col key={book._id}>
-              <Card className="shadow-sm">
-                <Card.Img 
-                  variant="top" 
-                  src={book.bookImage} 
-                  style={{ 
-                    width: '100%',
-                    height: '350px',
-                    objectFit: 'cover' 
-                  }} 
-                />
-                <Card.Body>
-                  <Card.Title>{book.title}</Card.Title>
-                  <Card.Text className="text-end">
-                    <strong>المؤلف:</strong> {book.author}<br />
-                    <strong>الرسام:</strong> {book.illustrator || 'غير محدد'}<br />
-                    <strong>عدد الصفحات:</strong> {book.numberOfPages || 'غير محدد'}<br />
-                    <strong>تاريخ المناقشة:</strong> {book.Discussiondate ? new Date(book.Discussiondate).toLocaleDateString('ar-EG', { day: 'numeric', month: 'numeric', year: 'numeric' }) : 'غير محدد'}
-                  </Card.Text>
-                  <div className="d-flex justify-content-between">
-                    <Button 
-                      variant="warning" 
-                      size="sm"
-                      onClick={() => {
-                        setSelectedBook(book);
-                        setShowUpdateModal(true);
-                      }}
-                    >
-                      تعديل
-                    </Button>
-                    <Button 
-                      variant="danger" 
-                      size="sm"
-                      onClick={() => {
-                        setSelectedBook(book);
-                        setShowDeleteModal(true);
-                      }}
-                    >
-                      حذف
-                    </Button>
-                    <Button 
-                      variant="success" 
-                      size="sm"
-                      onClick={() => {
-                        setSelectedBook(book);
-                        setShowRatingModal(true);
-                      }}
-                    >
-                     تقييم الطلاب
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
+          {renderBookCards()}
         </Row>
       )}
 
@@ -839,6 +884,44 @@ export default function TeacherBooks() {
       </Modal>
 
       {renderRatingModal()}
+
+      {/* Notification Modal */}
+      <Modal
+        show={showNotificationModal}
+        onHide={() => setShowNotificationModal(false)}
+        centered
+      >
+        <Modal.Header  className={`bg-${notificationVariant} text-white`}>
+          <Modal.Title>
+            {notificationVariant === 'success' && 'نجاح'}
+            {notificationVariant === 'warning' && 'تنبيه'}
+            {notificationVariant === 'danger' && 'خطأ'}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{notificationMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowNotificationModal(false)}>
+            إغلاق
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Toast Notification */}
+      <Toast
+        show={showToast}
+        onClose={() => setShowToast(false)}
+        delay={3000}
+        autohide
+        className={`position-fixed top-0 end-0 m-4 bg-${toastVariant}`}
+        style={{ zIndex: 9999 }}
+      >
+        <Toast.Header>
+          <strong className="me-auto">{toastVariant === 'success' ? 'نجاح' : 'خطأ'}</strong>
+        </Toast.Header>
+        <Toast.Body className={toastVariant === 'success' ? 'text-dark' : 'text-white'}>
+          {toastMessage}
+        </Toast.Body>
+      </Toast>
     </Container>
   );
 }

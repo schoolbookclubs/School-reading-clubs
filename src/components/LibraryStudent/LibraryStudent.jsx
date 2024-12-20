@@ -3,25 +3,7 @@ import { DataContext } from '../../context/context.js';
 import { FaStar, FaBook, FaSpinner, FaCheckCircle, FaExclamationCircle, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
 import {jwtDecode} from 'jwt-decode';
 import './LibraryStudent.css';
-
-// Success Popup Component
-const SuccessPopup = ({ onClose }) => {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 3000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
-  return (
-    <div className="success-popup">
-      <div className="success-popup-content">
-        <FaCheckCircle className="success-icon" />
-        <h2 >تم إرسال تقييمك بنجاح!</h2>
-        <p >شكراً لك على مشاركة رأيك</p>
-        <div className="success-popup-animation"></div>
-      </div>
-    </div>
-  );
-};
+import { Modal as BootstrapModal, Alert } from 'react-bootstrap';
 
 // Improved API Response Modal Component
 const APIResponseModal = ({ type, message, onClose }) => {
@@ -79,6 +61,7 @@ const APIResponseModal = ({ type, message, onClose }) => {
 
 const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
   const [rating, setRating] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [review, setReview] = useState({
     recommendBook: '',
     authorStyle: '',
@@ -149,6 +132,7 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
 
   const handleSubmit = async () => {
     if (validateForm()) {
+      setIsSubmitting(true);
       try {
         // Sanitize and validate data before submission
         const sanitizedReview = Object.keys(review).reduce((acc, key) => {
@@ -170,32 +154,24 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
 
         const submissionData = {
           ...sanitizedReview,
-          bookRating: rating,  // Rename rating to bookRating to match backend
-          schoolCode: decodedToken.schoolCode // Add schoolCode
+          bookRating: rating,
+          schoolCode: decodedToken.schoolCode
         };
 
         const response = await onSubmit(submissionData);
         
-        // Only set success modal if submission is successful
-        setAPIResponse({ 
-          type: 'success', 
-          message: 'تم إرسال تقييمك بنجاح!' 
-        });
-        setShowAPIResponseModal(true);
+        if (response.success) {
+          onClose(); // Close the modal on success
+        }
       } catch (error) {
         console.error('Book rating submission error:', error);
-        
-        // More detailed error handling
-        const errorMessage = 
-          error.response?.data?.message || 
-          error.message || 
-          'حدث خطأ أثناء إرسال التقييم. يرجى المحاولة مرة أخرى.';
-
         setAPIResponse({ 
           type: 'error', 
-          message: errorMessage 
+          message: error.response?.data?.message || error.message || 'حدث خطأ أثناء إرسال التقييم'
         });
         setShowAPIResponseModal(true);
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -393,14 +369,18 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
           <button 
             onClick={handleSubmit} 
             className="submit-btn" 
-            disabled={submitting}
+            disabled={isSubmitting}
           >
-            {submitting ? 'جارٍ الإرسال...' : 'إرسال التقييم'}
+            {isSubmitting ? (
+              <FaSpinner className="fa-spin" />
+            ) : (
+              'إرسال التقييم'
+            )}
           </button>
           <button 
             onClick={onClose} 
             className="cancel-btn" 
-            disabled={submitting}
+            disabled={isSubmitting}
           >
             إلغاء
           </button>
@@ -412,6 +392,7 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
 
 // Self Assessment Modal Component
 const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
+  const { submitSelfAssessment } = useContext(DataContext);
   const [assessment, setAssessment] = useState({
     enjoyedReading: 1,
     readUsefulBooks: 1,
@@ -426,8 +407,6 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
   const [submitting, setSubmitting] = useState(false);
   const [showAPIResponseModal, setShowAPIResponseModal] = useState(false);
   const [apiResponse, setAPIResponse] = useState({ type: '', message: '' });
-  const [validationError, setValidationError] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
   const decodedToken = jwtDecode(localStorage.getItem('token'));
 
   const assessmentLabels = {
@@ -451,52 +430,31 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
-      setValidationError(null);
-      setErrorMessage('');
-      
-      // Convert numeric ratings to string and add validation
-      const assessmentData = Object.keys(assessment).reduce((acc, field) => {
-        const value = assessment[field];
-        
-        // Validate that value is a number and within expected range
-        if (typeof value !== 'number' || value < 1 || value > 5) {
-          throw new Error(`Invalid rating for ${field}: ${value}`);
-        }
-        
-        // Convert to string for potential backend requirements
-        acc[field] = value.toString();
-        return acc;
-      }, {
-        // Explicitly add these fields with empty values to satisfy backend validation
-        readingMotivation: '',
-        readingChallenges: '',
-        personalGrowth: '',
-        futureReadingPlans: ''
-      });
 
-      const response = await onSubmit({
-        ...assessmentData,
-        schoolCode: decodedToken.schoolCode // Add schoolCode
-      });
-      
-      // Only set success modal if submission is successful
-      setAPIResponse({ 
-        type: 'success', 
-        message: 'تم إرسال التقييم الذاتي بنجاح!' 
+      const result = await submitSelfAssessment(
+        decodedToken.id,
+        book._id,
+        {
+          schoolCode: decodedToken.schoolCode,
+          ...assessment
+        }
+      );
+
+      setAPIResponse({
+        type: result.success ? 'success' : 'error',
+        message: result.message
       });
       setShowAPIResponseModal(true);
+
+      if (result.success) {
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      }
     } catch (error) {
-      console.error('Error submitting self-assessment:', error);
-      
-      // More robust error handling
-      const errorDetails = 
-        error.response?.data?.message || 
-        error.message || 
-        'حدث خطأ غير متوقع أثناء إرسال التقييم الذاتي. يرجى المحاولة مرة أخرى.';
-      
-      setAPIResponse({ 
-        type: 'error', 
-        message: errorDetails 
+      setAPIResponse({
+        type: 'error',
+        message: error.message || 'حدث خطأ أثناء إضافة التقييم الذاتي'
       });
       setShowAPIResponseModal(true);
     } finally {
@@ -506,14 +464,16 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
 
   const handleAPIResponseModalClose = () => {
     setShowAPIResponseModal(false);
-    onClose();
+    if (apiResponse.type === 'success') {
+      onClose();
+    }
   };
 
   return (
     <div className="self-assessment-modal">
       <div className="modal-content">
         <h2>التقييم الذاتي لكتاب {book.title}</h2>
-        
+
         {Object.keys(assessment).map(field => (
           <div key={field} className="assessment-item">
             <label>{assessmentLabels[field]}</label>
@@ -527,9 +487,6 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
                 />
               ))}
             </div>
-            {validationError && validationError[field] && (
-              <p className="error-message">{validationError[field]}</p>
-            )}
           </div>
         ))}
 
@@ -551,11 +508,13 @@ const SelfAssessmentModal = ({ book, onClose, onSubmit }) => {
             إلغاء
           </button>
         </div>
-        
-        {errorMessage && (
-          <div className="error-message">
-            <p>{errorMessage}</p>
-          </div>
+
+        {showAPIResponseModal && (
+          <APIResponseModal
+            type={apiResponse.type}
+            message={apiResponse.message}
+            onClose={handleAPIResponseModalClose}
+          />
         )}
       </div>
     </div>
@@ -566,7 +525,9 @@ export default function LibraryStudent() {
   const { 
     fetchBooksBySchoolCode, 
     submitBookRating, 
-    submitSelfAssessment 
+    getBookRating,
+    submitSelfAssessment,
+    getSelfAssessment 
   } = useContext(DataContext);
   
   const [books, setBooks] = useState([]);
@@ -576,6 +537,8 @@ export default function LibraryStudent() {
   const [submitting, setSubmitting] = useState(false);
   const [showAPIResponseModal, setShowAPIResponseModal] = useState(false);
   const [apiResponse, setAPIResponse] = useState({ type: '', message: '' });
+  const [loadingRatingButton, setLoadingRatingButton] = useState(null);
+  const [loadingSelfAssessmentButton, setLoadingSelfAssessmentButton] = useState(null);
 
   // Unified method to show API response
   const showAPIResponse = (type, message) => {
@@ -604,41 +567,83 @@ export default function LibraryStudent() {
     }
   };
 
-  // Handle book rating submission
-  const handleBookRating = async (book, ratingData) => {
+  const handleBookRatingSubmit = async (reviewData) => {
     try {
-      setSubmitting(true);
+      const result = await submitBookRating(selectedBook._id, reviewData);
       
-      // Validate rating data
-      const requiredFields = [
-        'recommendBook', 'authorStyle', 'keyIdeas', 
-        'likedIdeas', 'dislikedIdeas', 'memorableQuotes', 
-        'potentialAdditions', 'personalImpact'
-      ];
-
-      const missingFields = requiredFields.filter(field => 
-        !ratingData[field] || ratingData[field].trim() === ''
-      );
-
-      if (ratingData.rating === 0) {
-        missingFields.push('التقييم');
+      if (result.success) {
+        setShowAPIResponseModal(false);
+        setShowAPIResponseModal(true);
+        setAPIResponse({
+          type: 'success',
+          message: result.message
+        });
       }
-
-      if (missingFields.length > 0) {
-        throw new Error(`يرجى ملء جميع الحقول المطلوبة: ${missingFields.join(', ')}`);
-      }
-
-      await submitBookRating(book, ratingData);
-      
-      showAPIResponse('success', 'تم إرسال تقييم الكتاب بنجاح');
-      setSelectedBook(null);
+      return result;
     } catch (error) {
-      showAPIResponse('error', error.message || 'حدث خطأ أثناء إرسال التقييم');
+      // Let the BookRatingModal handle the error display
+      throw error;
+    }
+  };
+
+  const handleRateBookClick = async (book) => {
+    setLoadingRatingButton(book._id);
+    try {
+      const result = await getBookRating(book._id);
       
-      // Optional: log the error for debugging
-      console.error('Book Rating Error:', error);
+      if (result.data && result.data.length > 0) {
+        // Book has already been rated
+        setAPIResponse({
+          type: 'warning',
+          message: 'تم تقييم هذا الكتاب مسبقاً'
+        });
+        setShowAPIResponseModal(true);
+      } else {
+        // Book hasn't been rated, show rating modal directly
+        setSelectedBook(book);
+      }
+    } catch (error) {
+      // Only show error if it's not a "no rating found" error
+      if (error.message !== 'لم يتم العثور على تقييم لهذا الكتاب') {
+        console.error('Error checking book rating:', error);
+        setAPIResponse({
+          type: 'error',
+          message: error.message || 'حدث خطأ أثناء التحقق من تقييم الكتاب'
+        });
+        setShowAPIResponseModal(true);
+      } else {
+        // If no rating found, show rating modal directly
+        setSelectedBook(book);
+      }
     } finally {
-      setSubmitting(false);
+      setLoadingRatingButton(null);
+    }
+  };
+
+  const handleSelfAssessmentClick = async (book) => {
+    setLoadingSelfAssessmentButton(book._id);
+    try {
+      const decodedToken = jwtDecode(localStorage.getItem('token'));
+      const result = await getSelfAssessment(decodedToken.id, book._id);
+      
+      if (result.success && result.data.length > 0) {
+        setAPIResponse({
+          type: 'warning',
+          message: 'تم التقييم الذاتي لهذا الكتاب مسبقاً'
+        });
+        setShowAPIResponseModal(true);
+      } else {
+        setSelectedBookForSelfAssessment(book);
+      }
+    } catch (error) {
+      console.error('Error checking self assessment:', error);
+      setAPIResponse({
+        type: 'error',
+        message: 'حدث خطأ أثناء التحقق من التقييم الذاتي'
+      });
+      setShowAPIResponseModal(true);
+    } finally {
+      setLoadingSelfAssessmentButton(null);
     }
   };
 
@@ -719,16 +724,26 @@ export default function LibraryStudent() {
               <p><strong>تاريخ المناقشة:</strong> {book.Discussiondate ? new Date(book.Discussiondate).toLocaleDateString('ar-EG', { day: 'numeric', month: 'numeric', year: 'numeric' }) : 'غير محدد'} </p>
               <div className="book-actions">
                 <button 
-                  onClick={() => setSelectedBook(book)} 
                   className="btn btn-success p-0"
+                  onClick={() => handleRateBookClick(book)}
+                  disabled={loadingRatingButton === book._id}
                 >
-                  بطاقة تقييم الكتاب
+                  {loadingRatingButton === book._id ? (
+                    'انتظر قليلا...'
+                  ) : (
+                    'بطاقة تقييم الكتاب'
+                  )}
                 </button>
                 <button 
-                  onClick={() => setSelectedBookForSelfAssessment(book)} 
+                  onClick={() => handleSelfAssessmentClick(book)}
                   className="btn btn-primary p-0"
+                  disabled={loadingSelfAssessmentButton === book._id}
                 >
-                  التقييم الذاتي للطالب
+                  {loadingSelfAssessmentButton === book._id ? (
+                    'انتظر قليلا...'
+                  ) : (
+                    'التقييم الذاتي للطالب'
+                  )}
                 </button>
               </div>
             </div>
@@ -740,7 +755,7 @@ export default function LibraryStudent() {
         <BookRatingModal 
           book={selectedBook} 
           onClose={() => setSelectedBook(null)}
-          onSubmit={(reviewData) => handleBookRating(selectedBook, reviewData)}
+          onSubmit={handleBookRatingSubmit}
           submitting={submitting}
         />
       )}

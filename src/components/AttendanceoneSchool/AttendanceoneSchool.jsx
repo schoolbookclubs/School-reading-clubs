@@ -50,7 +50,7 @@ export default function AttendanceoneSchool() {
       <div className="attendance-page">
         <Container className="attendance-container">
           <h1 className="attendance-title">سجل الحضور والغياب</h1>
-          <div className="no-data-message">لا توجد بيانات حضور متاحة</div>
+          <div className="no-data-message text-dark">لا توجد بيانات حضور متاحة</div>
         </Container>
       </div>
     );

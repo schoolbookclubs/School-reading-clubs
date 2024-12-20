@@ -64,7 +64,7 @@ export default function TeacherEvaluationsOfStudents() {
   };
 
   if (!selectedBook) {
-    return <div>لا توجد تقييمات متاحة</div>;
+    return <div className='text-center my-5 fw-bold fs-5'>لا توجد تقييمات متاحة</div>;
   }
 
   return (

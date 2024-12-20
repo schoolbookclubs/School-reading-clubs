@@ -56,7 +56,7 @@ export default function Clubevaluations() {
       <div className="club-evaluations">
         <Container className="evaluation-container">
           <h1 className="evaluation-title">تقييمات نادي القراءة المدرسي</h1>
-          <div className="no-data-message">لا توجد تقييمات متاحة</div>
+          <div className="no-data-message text-dark">لا توجد تقييمات متاحة</div>
         </Container>
       </div>
     );

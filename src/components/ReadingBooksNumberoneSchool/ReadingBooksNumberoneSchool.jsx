@@ -46,7 +46,7 @@ export default function ReadingBooksNumberoneSchool() {
       <div className="reading-stats-page">
         <Container className="reading-stats-container">
           <h1 className="reading-stats-title">إحصائيات القراءة</h1>
-          <div className="no-data-message">لا توجد بيانات قراءة متاحة</div>
+          <div className="no-data-message text-dark">لا توجد بيانات قراءة متاحة</div>
         </Container>
       </div>
     );

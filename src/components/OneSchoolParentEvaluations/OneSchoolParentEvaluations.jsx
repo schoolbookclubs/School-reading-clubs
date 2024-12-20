@@ -64,7 +64,7 @@ export default function OneSchoolParentEvaluations() {
       <div className="parent-evaluations">
         <Container className="evaluation-container">
           <h1 className="evaluation-title">تقييمات أولياء الأمور</h1>
-          <div className="no-data-message">لا توجد تقييمات متاحة</div>
+          <div className="no-data-message text-dark">لا توجد تقييمات متاحة</div>
         </Container>
       </div>
     );

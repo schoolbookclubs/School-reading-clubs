@@ -65,7 +65,7 @@ export default function Selfevaluations() {
       <div className="self-evaluations">
         <Container className="evaluation-container">
           <h1 className="evaluation-title">التقييمات الذاتية للطلاب</h1>
-          <div className="no-data-message">لا توجد تقييمات متاحة</div>
+          <div className="no-data-message text-dark">لا توجد تقييمات متاحة</div>
         </Container>
       </div>
     );

@@ -346,10 +346,8 @@ export default function DataContextFunction({ children }) {
       const decoded = decodeToken(token);
       const teacherId = decoded?.id;
       if (!teacherId) throw new Error('id of teacher not found in token');
-
-      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/RateTeacher/teacherrates/${teacherId}`, {
-       
-      });
+      console.log("teacherId in getTeacherRatingsforStudentsByteacherId:", teacherId);
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/RateTeacher/teacherrates/${teacherId}`);
         
       return response.data;
     } catch (error) {
@@ -382,11 +380,7 @@ export default function DataContextFunction({ children }) {
       const schoolCode = decoded?.schoolCode;
       if (!schoolCode) throw new Error('School code not found in token');
 
-      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/StudentSelfAssessment/oneschool/${schoolCode}/StudentsSelfAssessments`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/StudentSelfAssessment/oneschool/${schoolCode}/StudentsSelfAssessments`);
 
       return response.data;
     } catch (error) {

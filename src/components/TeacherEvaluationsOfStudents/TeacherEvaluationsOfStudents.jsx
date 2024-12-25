@@ -7,16 +7,21 @@ export default function TeacherEvaluationsOfStudents() {
   const [bookRatings, setBookRatings] = useState([]);
   const [selectedBook, setSelectedBook] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [teacherName, setTeacherName] = useState('');
 
   useEffect(() => {
     const fetchRatings = async () => {
       setIsLoading(true);
       try {
         const data = await getTeacherRatingsforStudentsByteacherId();
-        if (data && data.bookRatings) {
-          setBookRatings(data.bookRatings);
-          if (data.bookRatings.length > 0) {
-            setSelectedBook(data.bookRatings[0]);
+        console.log("data , " , data)
+        if (data) {
+          setTeacherName(data.teacherName);
+          if (data.bookRatings) {
+            setBookRatings(data.bookRatings);
+            if (data.bookRatings.length > 0) {
+              setSelectedBook(data.bookRatings[0]);
+            }
           }
         }
       } catch (error) {
@@ -49,7 +54,7 @@ export default function TeacherEvaluationsOfStudents() {
     return (
       <tr>
         <td>{label}</td>
-        <td>{selectedBook.ratings[0]?.teacher}</td>
+        <td className='text-dark'>{teacherName}</td>
         <td>{selectedBook.bookTitle}</td>
         {selectedBook.ratings.map((rating, index) => (
           <td key={index}>

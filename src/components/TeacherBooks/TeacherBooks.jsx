@@ -25,12 +25,22 @@ export default function TeacherBooks() {
   const [selectedStudent, setSelectedStudent] = useState(null);
 
   // State for storing ratings per book
-  const [bookRatings, setBookRatings] = useState({});
+  const [bookRatings, setBookRatings] = useState(() => {
+    const savedRatings = localStorage.getItem('teacherBookRatings');
+    return savedRatings ? JSON.parse(savedRatings) : {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem('teacherBookRatings', JSON.stringify(bookRatings));
+  }, [bookRatings]);
 
   // Notification Modal state
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [notificationVariant, setNotificationVariant] = useState('success');
+
+  // Add new state for confirmation modal
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   // Validation schema for book update
   const bookUpdateSchema = Yup.object().shape({
@@ -279,10 +289,15 @@ export default function TeacherBooks() {
   // State for student ratings
   const [studentRatings, setStudentRatings] = useState(initializeStudentRatings());
 
-  // Reset ratings when changing books
+  // تعديل handleBookSelect لاسترجاع التقييمات المحفوظة للكتاب
   const handleBookSelect = (book) => {
     setSelectedBook(book);
-    setStudentRatings({}); // Reset all student ratings when selecting a new book
+    // استرجاع التقييمات المحفوظة للكتاب إذا وجدت
+    if (bookRatings[book._id]) {
+      setStudentRatings(bookRatings[book._id]);
+    } else {
+      setStudentRatings({});
+    }
   };
 
   // Update handleRatingChange to store ratings per book
@@ -304,17 +319,38 @@ export default function TeacherBooks() {
           }
         };
         delete newRatings[correctStudentId][skillId];
+        
+        // حفظ التقييمات الجديدة في bookRatings
+        if (selectedBook) {
+          setBookRatings(prev => ({
+            ...prev,
+            [selectedBook._id]: newRatings
+          }));
+        }
+        
         return newRatings;
       });
     } else {
       // إذا تم اختيار قيمة حقيقية، نضيفها للتقييمات
-      setStudentRatings(prevRatings => ({
-        ...prevRatings,
-        [correctStudentId]: {
-          ...(prevRatings[correctStudentId] || {}),
-          [skillId]: processedValue
+      setStudentRatings(prevRatings => {
+        const newRatings = {
+          ...prevRatings,
+          [correctStudentId]: {
+            ...(prevRatings[correctStudentId] || {}),
+            [skillId]: processedValue
+          }
+        };
+        
+        // حفظ التقييمات الجديدة في bookRatings
+        if (selectedBook) {
+          setBookRatings(prev => ({
+            ...prev,
+            [selectedBook._id]: newRatings
+          }));
         }
-      }));
+        
+        return newRatings;
+      });
     }
   };
 
@@ -334,6 +370,121 @@ export default function TeacherBooks() {
     setNotificationMessage(message);
     setNotificationVariant(variant);
     setShowNotificationModal(true);
+  };
+
+  // Function to check if all ratings are complete for a student
+  const areAllRatingsComplete = (studentId) => {
+    const studentRating = studentRatings[studentId] || {};
+    return evaluationCriteria
+      .filter(criteria => criteria.type === 'rating' || criteria.type === 'attendance')
+      .every(criteria => studentRating[criteria.id] && studentRating[criteria.id] !== "اختر");
+  };
+
+  // تعديل submitAllRatings للتحقق من اكتمال جميع التقييمات
+  const submitAllRatings = async () => {
+    if (!selectedBook || Object.keys(studentRatings).length === 0) {
+      showNotification('لم يتم اختيار أي طالب للتقييم', 'warning');
+      return;
+    }
+
+    const ratedStudentIds = Object.keys(studentRatings).filter(studentId => 
+      Object.keys(studentRatings[studentId]).length > 0
+    );
+
+    if (ratedStudentIds.length === 0) {
+      showNotification('لم يتم اختيار أي طالب للتقييم', 'warning');
+      return;
+    }
+
+    // التحقق من اكتمال جميع التقييمات
+    const hasIncompleteRatings = ratedStudentIds.some(studentId => {
+      const studentRating = studentRatings[studentId] || {};
+      return evaluationCriteria
+        .filter(criteria => criteria.type === 'rating' || criteria.type === 'attendance')
+        .some(criteria => !studentRating[criteria.id] || studentRating[criteria.id] === "اختر");
+    });
+
+    if (hasIncompleteRatings) {
+      showNotification('يجب تقييم جميع المهارات لكل طالب قبل الحفظ النهائي', 'warning');
+      return;
+    }
+
+    // إظهار نافذة التأكيد النهائية
+    setShowConfirmationModal(true);
+  };
+
+  // تعديل handleFinalSubmission للتعامل مع الإرسال النهائي
+  const handleFinalSubmission = async () => {
+    setShowConfirmationModal(false);
+    const ratedStudentIds = Object.keys(studentRatings).filter(studentId => 
+      Object.keys(studentRatings[studentId]).length > 0
+    );
+    await saveRatings(ratedStudentIds);
+  };
+
+  // Separate function for saving ratings
+  const saveRatings = async (ratedStudentIds) => {
+    setIsRatingSubmitting(true);
+    const currentBookId = selectedBook._id; // حفظ معرف الكتاب الحالي
+
+    try {
+      for (const studentId of ratedStudentIds) {
+        const ratingData = {
+          bookId: currentBookId,
+          ratings: {
+            attendance: studentRatings[studentId]?.attendance || 'لا',
+            completeReading: studentRatings[studentId]?.completeReading || 1,
+            deepUnderstanding: studentRatings[studentId]?.deepUnderstanding || 1,
+            personalReflection: studentRatings[studentId]?.personalReflection || 1,
+            confidenceExpression: studentRatings[studentId]?.confidenceExpression || 1,
+            creativeIdeas: studentRatings[studentId]?.creativeIdeas || 1,
+            lifeConnectionThinking: studentRatings[studentId]?.lifeConnectionThinking || 1,
+            independentThinking: studentRatings[studentId]?.independentThinking || 1,
+            clearCommunication: studentRatings[studentId]?.clearCommunication || 1,
+            activeListening: studentRatings[studentId]?.activeListening || 1,
+            constructiveInteraction: studentRatings[studentId]?.constructiveInteraction || 1,
+            activeParticipation: studentRatings[studentId]?.activeParticipation || 1,
+            respectDiversity: studentRatings[studentId]?.respectDiversity || 1,
+            buildingFriendships: studentRatings[studentId]?.buildingFriendships || 1,
+            collaboration: studentRatings[studentId]?.collaboration || 1
+          },
+          isComplete: areAllRatingsComplete(studentId)
+        };
+
+        const response = await rateStudent(studentId, ratingData);
+        showNotification(response.message, 'success');
+      }
+    } catch (error) {
+      if (error.ratedStudents) {
+        showNotification(error.message, 'danger');
+      } else {
+        showNotification(error.message, 'danger');
+      }
+    } finally {
+      // حذف التقييمات من localStorage و State في جميع الحالات
+      setBookRatings(prev => {
+        const newBookRatings = { ...prev };
+        delete newBookRatings[currentBookId];
+        // تحديث localStorage مباشرة
+        localStorage.setItem('teacherBookRatings', JSON.stringify(newBookRatings));
+        return newBookRatings;
+      });
+
+      // إعادة تعيين الحالة
+      setStudentRatings({});
+      setShowRatingModal(false);
+      setSelectedBook(null);
+      setIsRatingSubmitting(false);
+
+      // إعادة فتح نافذة التقييم للكتاب نفسه
+      setTimeout(() => {
+        const bookToReselect = books.find(book => book._id === currentBookId);
+        if (bookToReselect) {
+          setSelectedBook(bookToReselect);
+          setShowRatingModal(true);
+        }
+      }, 100);
+    }
   };
 
   // Handle rating submission
@@ -378,75 +529,6 @@ export default function TeacherBooks() {
         // عرض رسالة الخطأ العامة
         showNotification(error.message, 'danger');
       }
-    }
-  };
-
-  // Submit all ratings for multiple students
-  const submitAllRatings = async () => {
-    if (!selectedBook || Object.keys(studentRatings).length === 0) return;
-
-    // Validate that all students have all required ratings
-    const hasEmptyRatings = students.some(student => {
-      const studentRating = studentRatings[student._id] || {};
-      return evaluationCriteria
-        .filter(criteria => criteria.type === 'rating' || criteria.type === 'attendance')
-        .some(criteria => !studentRating[criteria.id] || studentRating[criteria.id] === "اختر");
-    });
-
-    if (hasEmptyRatings) {
-      showNotification('يجب تقييم جميع المهارات لكل طالب', 'warning');
-      return;
-    }
-
-    setIsRatingSubmitting(true);
-    try {
-      const ratedStudentIds = Object.keys(studentRatings).filter(studentId => 
-        Object.keys(studentRatings[studentId]).length > 0
-      );
-
-      if (ratedStudentIds.length === 0) {
-        showNotification('لم يتم اختيار أي طالب للتقييم', 'warning');
-        return;
-      }
-
-      // إرسال التقييم لكل طالب على حدة
-      for (const studentId of ratedStudentIds) {
-        const ratingData = {
-          bookId: selectedBook._id,
-          ratings: {
-            attendance: studentRatings[studentId]?.attendance || 'لا',
-            completeReading: studentRatings[studentId]?.completeReading || 1,
-            deepUnderstanding: studentRatings[studentId]?.deepUnderstanding || 1,
-            personalReflection: studentRatings[studentId]?.personalReflection || 1,
-            confidenceExpression: studentRatings[studentId]?.confidenceExpression || 1,
-            creativeIdeas: studentRatings[studentId]?.creativeIdeas || 1,
-            lifeConnectionThinking: studentRatings[studentId]?.lifeConnectionThinking || 1,
-            independentThinking: studentRatings[studentId]?.independentThinking || 1,
-            clearCommunication: studentRatings[studentId]?.clearCommunication || 1,
-            activeListening: studentRatings[studentId]?.activeListening || 1,
-            constructiveInteraction: studentRatings[studentId]?.constructiveInteraction || 1,
-            activeParticipation: studentRatings[studentId]?.activeParticipation || 1,
-            respectDiversity: studentRatings[studentId]?.respectDiversity || 1,
-            buildingFriendships: studentRatings[studentId]?.buildingFriendships || 1,
-            collaboration: studentRatings[studentId]?.collaboration || 1
-          }
-        };
-
-        const response = await rateStudent(studentId, ratingData);
-        showNotification(response.message, 'success');
-      }
-      
-      setShowRatingModal(false);
-      setSelectedBook(null);
-      setStudentRatings({});
-    } catch (error) {
-      if (error.ratedStudents) {
-        showNotification(error.message, 'danger');
-      } else {
-        showNotification(error.message, 'danger');
-      }
-    } finally {
-      setIsRatingSubmitting(false);
     }
   };
 
@@ -632,7 +714,7 @@ export default function TeacherBooks() {
             variant="top" 
             src={book.bookImage} 
             alt={book.title}
-            style={{ height: '350px', width: '100%', objectFit: 'cover' }}
+            style={{ height: '360px', width: '100%', objectFit: 'cover' }}
           />
           <Card.Body>
             <Card.Title>{book.title}</Card.Title>
@@ -884,6 +966,31 @@ export default function TeacherBooks() {
       </Modal>
 
       {renderRatingModal()}
+
+      {/* Confirmation Modal */}
+      <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title className="text-center w-100">تأكيد التقييم النهائي</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="text-center">
+            <div className="alert alert-warning">
+              <i className="fas fa-exclamation-triangle me-2"></i>
+              <strong>تنبيه هام</strong>
+            </div>
+            <p>هذا التقييم نهائي ولا يمكن التغيير فيه لاحقًا</p>
+            <p>هل أنت متأكد من المتابعة؟</p>
+          </div>
+        </Modal.Body>
+        <Modal.Footer className="justify-content-center">
+          <Button variant="secondary" onClick={() => setShowConfirmationModal(false)}>
+            إلغاء
+          </Button>
+          <Button variant="primary" onClick={handleFinalSubmission}>
+            تأكيد وإرسال التقييم
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Notification Modal */}
       <Modal

@@ -49,6 +49,11 @@ import ShowParentassessments from './components/Parentassessment/ShowParentasses
 import StudentReviewsofTeacherBooks from './components/StudentReviewsofTeacherBooks/StudentReviewsofTeacherBooks.jsx';
 import Show_Student_SchoolBookRatings from './components/StudentReviewsofTeacherBooks/Show_Student_SchoolBookRatings.jsx';
 import Show_Student_SelfAssessments from './components/StudentReviewsofTeacherBooks/Show_Student_SelfAssessments.jsx';
+import ChangeTeacherPassword from './components/ForgetPasswordteacher/ChangeTeacherPassword.jsx';
+import ChangeStudentPassword from './components/ForgetPasswordstudent/ChangeStudentPassword.jsx';
+import ChangeSupervisorPassword from './components/ForgetPasswordsupervisor/ChangeSupervisorPassword.jsx';
+import ChangeParentPassword from './components/ForgetPasswordparent/ChangeParentPassword.jsx';
+
 export default function App() {
   const router = createBrowserRouter([
     {
@@ -100,6 +105,22 @@ export default function App() {
         { 
           path: '/ForgetPasswordstudent', 
           element: <RedirectIfAuthenticated>  <ForgetPasswordstudent /></RedirectIfAuthenticated> 
+        },
+        {
+          path: '/ChangeTeacherPassword',
+          element: <RedirectIfAuthenticated><ChangeTeacherPassword /></RedirectIfAuthenticated>
+        },
+        {
+          path: '/ChangeStudentPassword',
+          element: <RedirectIfAuthenticated><ChangeStudentPassword /></RedirectIfAuthenticated>
+        },
+        {
+          path: '/ChangeSupervisorPassword',
+          element: <RedirectIfAuthenticated><ChangeSupervisorPassword /></RedirectIfAuthenticated>
+        },
+        {
+          path: '/ChangeParentPassword',
+          element: <RedirectIfAuthenticated><ChangeParentPassword /></RedirectIfAuthenticated>
         },
         { 
           path: '/ForgotPasswordParent', 

@@ -120,7 +120,7 @@ const LoginTeacher = () => {
               <div className="links-container">
                 <span
                   className="link"
-                  onClick={() => navigate('/ForgetPasswordteacher')}
+                  onClick={() => navigate('/ChangeTeacherPassword')}
                 >
                   نسيت كلمة المرور؟
                 </span>

@@ -14,6 +14,7 @@ export default function OneSchoolTeacherEvaluations() {
       setIsLoading(true);
       try {
         const data = await getTeacherRatings();
+        console.log("data , " , data)
         if (data && data.bookRatings) {
           setBookRatings(data.bookRatings);
           if (data.bookRatings.length > 0) {

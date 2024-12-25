@@ -128,7 +128,7 @@ const LoginParent = () => {
                 </span>
                 <span
                   className="link"
-                  onClick={() => navigate('/ForgotPasswordParent')}
+                  onClick={() => navigate('/ChangeParentPassword')}
                 >
                   نسيت كلمة المرور؟
                 </span>

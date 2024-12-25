@@ -121,7 +121,7 @@ const LoginSupervisor = () => {
               <div className="links-container">
                 <span
                   className="link"
-                  onClick={() => navigate('/ForgotPasswordsupervisor')}
+                  onClick={() => navigate('/ChangeSupervisorPassword')}
                 >
                   نسيت كلمة المرور؟
                 </span>

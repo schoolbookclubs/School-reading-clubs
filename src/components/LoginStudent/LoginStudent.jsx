@@ -132,7 +132,7 @@ const LoginStudent = () => {
               <div className="links-container">
                 <span 
                   className="forgot-password-link"
-                  onClick={() => navigate('/ForgetPasswordstudent')}
+                  onClick={() => navigate('/ChangeStudentPassword')}
                 >
                   <i className="fas fa-key"></i>
                   نسيت كلمة المرور؟

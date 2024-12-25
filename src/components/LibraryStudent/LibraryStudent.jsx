@@ -62,22 +62,40 @@ const APIResponseModal = ({ type, message, onClose }) => {
 const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
   const [rating, setRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [review, setReview] = useState({
-    recommendBook: '',
-    authorStyle: '',
-    keyIdeas: '',
-    likedIdeas: '',
-    dislikedIdeas: '',
-    memorableQuotes: '',
-    potentialAdditions: '',
-    personalImpact: '',
-    readingStartDate: '',
-    readingEndDate: ''
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [review, setReview] = useState(() => {
+    // Try to load saved review from localStorage
+    const savedReview = localStorage.getItem(`book-review-${book._id}`);
+    return savedReview ? JSON.parse(savedReview) : {
+      recommendBook: '',
+      authorStyle: '',
+      keyIdeas: '',
+      likedIdeas: '',
+      dislikedIdeas: '',
+      memorableQuotes: '',
+      potentialAdditions: '',
+      personalImpact: '',
+      readingStartDate: '',
+      readingEndDate: ''
+    };
   });
   const [errors, setErrors] = useState({});
   const [showAPIResponseModal, setShowAPIResponseModal] = useState(false);
   const [apiResponse, setAPIResponse] = useState({ type: '', message: '' });
   const decodedToken = jwtDecode(localStorage.getItem('token'));
+
+  // Save to localStorage whenever review changes
+  useEffect(() => {
+    localStorage.setItem(`book-review-${book._id}`, JSON.stringify(review));
+  }, [review, book._id]);
+
+  // Load saved rating from localStorage
+  useEffect(() => {
+    const savedRating = localStorage.getItem(`book-rating-${book._id}`);
+    if (savedRating) {
+      setRating(parseInt(savedRating));
+    }
+  }, [book._id]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -107,6 +125,7 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
 
   const handleRatingChange = (star) => {
     setRating(star);
+    localStorage.setItem(`book-rating-${book._id}`, star.toString());
     // Clear rating error when a rating is selected
     if (errors.rating) {
       const newErrors = { ...errors };
@@ -132,47 +151,52 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
 
   const handleSubmit = async () => {
     if (validateForm()) {
-      setIsSubmitting(true);
-      try {
-        // Sanitize and validate data before submission
-        const sanitizedReview = Object.keys(review).reduce((acc, key) => {
-          // Trim all string values and ensure they are not empty
-          const value = typeof review[key] === 'string' ? review[key].trim() : review[key];
-          
-          if (value === '') {
-            throw new Error(`Field ${key} cannot be empty`);
-          }
-          
-          acc[key] = value;
-          return acc;
-        }, {});
+      setShowConfirmation(true);
+    }
+  };
 
-        // Validate rating
-        if (rating < 1 || rating > 5) {
-          throw new Error('Invalid book rating');
-        }
-
-        const submissionData = {
-          ...sanitizedReview,
-          bookRating: rating,
-          schoolCode: decodedToken.schoolCode
-        };
-
-        const response = await onSubmit(submissionData);
+  const handleConfirmedSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const sanitizedReview = Object.keys(review).reduce((acc, key) => {
+        const value = typeof review[key] === 'string' ? review[key].trim() : review[key];
         
-        if (response.success) {
-          onClose(); // Close the modal on success
+        if (value === '') {
+          throw new Error(`Field ${key} cannot be empty`);
         }
-      } catch (error) {
-        console.error('Book rating submission error:', error);
-        setAPIResponse({ 
-          type: 'error', 
-          message: error.response?.data?.message || error.message || 'حدث خطأ أثناء إرسال التقييم'
-        });
-        setShowAPIResponseModal(true);
-      } finally {
-        setIsSubmitting(false);
+        
+        acc[key] = value;
+        return acc;
+      }, {});
+
+      if (rating < 1 || rating > 5) {
+        throw new Error('Invalid book rating');
       }
+
+      const submissionData = {
+        ...sanitizedReview,
+        bookRating: rating,
+        schoolCode: decodedToken.schoolCode
+      };
+
+      const response = await onSubmit(submissionData);
+      
+      if (response.success) {
+        // Clear localStorage after successful submission
+        localStorage.removeItem(`book-review-${book._id}`);
+        localStorage.removeItem(`book-rating-${book._id}`);
+        onClose();
+      }
+    } catch (error) {
+      console.error('Book rating submission error:', error);
+      setAPIResponse({ 
+        type: 'error', 
+        message: error.response?.data?.message || error.message || 'حدث خطأ أثناء إرسال التقييم'
+      });
+      setShowAPIResponseModal(true);
+    } finally {
+      setIsSubmitting(false);
+      setShowConfirmation(false);
     }
   };
 
@@ -192,199 +216,221 @@ const BookRatingModal = ({ book, onClose, onSubmit, submitting }) => {
     );
   }
 
-
   return (
     <div className="book-rating-modal">
       <div className="modal-content">
-        
-
-        <h2 className='py-3 text-center'>تقييم كتاب {book.title}</h2>
-
-        {/* التقييم العام */}
-       
-
-        <div className="review-section">
-        
-
-          <div className="review-group">
-            
-          <div className="overall-rating">
-          <h3>التقييم العام</h3>
-          <div className="rating-display">
-            <span className="rating-number">{rating}/5</span>
-            <div className="star-rating">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <FaStar 
-                  key={star} 
-                  color={star <= rating ? "#ffc107" : "#e4e5e9"}
-                  onClick={() => handleRatingChange(star)}
-                  className="star-icon"
-                />
-              ))}
+        {showConfirmation ? (
+          <div className="confirmation-modal">
+            <h3>تأكيد إرسال التقييم</h3>
+            <p>هذا التقييم نهائي ولا يمكن التغيير فيه لاحقًا</p>
+            <div className="modal-actions">
+              <button 
+                onClick={handleConfirmedSubmit} 
+                disabled={isSubmitting}
+                className="btn btn-success"
+              >
+                {isSubmitting ? 'جاري الإرسال...' : 'تأكيد وإرسال'}
+              </button>
+              <button 
+                onClick={() => setShowConfirmation(false)} 
+                disabled={isSubmitting}
+                className="cancel-btn"
+              >
+                رجوع
+              </button>
             </div>
           </div>
-          {errors.rating && <p className="error-message">{errors.rating}</p>}
-        </div>
-            {/* اوصي بقراءته */}
-            <div className="recommend-section">
-              <label>أوصي بقراءته:</label>
-              <div>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="recommendBook" 
-                    value="نعم"
-                    checked={review.recommendBook === "نعم"}
-                    onChange={handleReviewChange}
-                  /> نعم
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="recommendBook" 
-                    value="لا"
-                    checked={review.recommendBook === "لا"}
-                    onChange={handleReviewChange}
-                  /> لا
-                </label>
+        ) : (
+          <div>
+            <h2 className='py-3 text-center'>تقييم كتاب {book.title}</h2>
+
+            {/* التقييم العام */}
+          
+
+            <div className="review-section">
+          
+
+              <div className="review-group">
+                
+              <div className="overall-rating">
+              <h3>التقييم العام</h3>
+              <div className="rating-display">
+                <span className="rating-number">{rating}/5</span>
+                <div className="star-rating">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <FaStar 
+                      key={star} 
+                      color={star <= rating ? "#ffc107" : "#e4e5e9"}
+                      onClick={() => handleRatingChange(star)}
+                      className="star-icon"
+                    />
+                  ))}
+                </div>
               </div>
-              {errors.recommendBook && <p className="error-message">{errors.recommendBook}</p>}
+              {errors.rating && <p className="error-message">{errors.rating}</p>}
             </div>
-          </div>
-          <div className="review-group reading-dates-container">
-            <h3>تاريخ القراءة</h3>
-            <div className="date-input-group">
-              <div className="date-input-wrapper">
-                <label htmlFor="readingStartDate" className="date-label">
-                  <span className="date-label-icon">📖</span>
-                  تاريخ بدء القراءة
-                </label>
-                <input 
-                  type="date"
-                  id="readingStartDate"
-                  name="readingStartDate"
-                  className="date-input"
-                  value={review.readingStartDate}
+                {/* اوصي بقراءته */}
+                <div className="recommend-section">
+                  <label>أوصي بقراءته:</label>
+                  <div>
+                    <label>
+                      <input 
+                        type="radio" 
+                        name="recommendBook" 
+                        value="نعم"
+                        checked={review.recommendBook === "نعم"}
+                        onChange={handleReviewChange}
+                      /> نعم
+                    </label>
+                    <label>
+                      <input 
+                        type="radio" 
+                        name="recommendBook" 
+                        value="لا"
+                        checked={review.recommendBook === "لا"}
+                        onChange={handleReviewChange}
+                      /> لا
+                    </label>
+                  </div>
+                  {errors.recommendBook && <p className="error-message">{errors.recommendBook}</p>}
+                </div>
+              </div>
+              <div className="review-group reading-dates-container">
+                <h3>تاريخ القراءة</h3>
+                <div className="date-input-group">
+                  <div className="date-input-wrapper">
+                    <label htmlFor="readingStartDate" className="date-label">
+                      <span className="date-label-icon">📖</span>
+                      تاريخ بدء القراءة
+                    </label>
+                    <input 
+                      type="date"
+                      id="readingStartDate"
+                      name="readingStartDate"
+                      className="date-input"
+                      value={review.readingStartDate}
+                      onChange={handleReviewChange}
+                      required
+                    />
+                    {errors.readingStartDate && <p className="error-message">{errors.readingStartDate}</p>}
+                  </div>
+                  
+                  <div className="date-input-wrapper">
+                    <label htmlFor="readingEndDate" className="date-label">
+                      <span className="date-label-icon">🏁</span>
+                      تاريخ انتهاء القراءة
+                    </label>
+                    <input 
+                      type="date"
+                      id="readingEndDate"
+                      name="readingEndDate"
+                      className="date-input"
+                      value={review.readingEndDate}
+                      onChange={handleReviewChange}
+                      required
+                    />
+                    {errors.readingEndDate && <p className="error-message">{errors.readingEndDate}</p>}
+                  </div>
+                </div>
+                {(errors.readingStartDate || errors.readingEndDate) && (
+                  <div className="date-validation-info">
+                    <p>💡 تأكد من اختيار تاريخ البدء قبل تاريخ الانتهاء</p>
+                  </div>
+                )}
+              </div>
+              <div className="review-group">
+                <h3>أسلوب الكتابة والأفكار</h3>
+                <textarea 
+                  name="authorStyle"
+                  placeholder="رأيك بأسلوب الكاتب"
+                  value={review.authorStyle}
                   onChange={handleReviewChange}
                   required
                 />
-                {errors.readingStartDate && <p className="error-message">{errors.readingStartDate}</p>}
-              </div>
-              
-              <div className="date-input-wrapper">
-                <label htmlFor="readingEndDate" className="date-label">
-                  <span className="date-label-icon">🏁</span>
-                  تاريخ انتهاء القراءة
-                </label>
-                <input 
-                  type="date"
-                  id="readingEndDate"
-                  name="readingEndDate"
-                  className="date-input"
-                  value={review.readingEndDate}
+                {errors.authorStyle && <p className="error-message">{errors.authorStyle}</p>}
+                
+                <textarea 
+                  name="keyIdeas"
+                  placeholder="ملخص لأهم الأفكار والأحداث"
+                  value={review.keyIdeas}
                   onChange={handleReviewChange}
                   required
                 />
-                {errors.readingEndDate && <p className="error-message">{errors.readingEndDate}</p>}
+                {errors.keyIdeas && <p className="error-message">{errors.keyIdeas}</p>}
+                
+                <textarea 
+                  name="likedIdeas"
+                  placeholder="أفكار أعجبتك"
+                  value={review.likedIdeas}
+                  onChange={handleReviewChange}
+                  required
+                />
+                {errors.likedIdeas && <p className="error-message">{errors.likedIdeas}</p>}
+                
+                <textarea 
+                  name="dislikedIdeas"
+                  placeholder="أفكار لم تعجبك"
+                  value={review.dislikedIdeas}
+                  onChange={handleReviewChange}
+                  required
+                />
+                {errors.dislikedIdeas && <p className="error-message">{errors.dislikedIdeas}</p>}
               </div>
+
+              <div className="review-group">
+                <h3>الاقتباسات والتأثير الشخصي</h3>
+                <textarea 
+                  name="memorableQuotes"
+                  placeholder="عبارات واقتباسات مميزة"
+                  value={review.memorableQuotes}
+                  onChange={handleReviewChange}
+                  required
+                />
+                {errors.memorableQuotes && <p className="error-message">{errors.memorableQuotes}</p>}
+                
+                <textarea 
+                  name="potentialAdditions"
+                  placeholder="لو كنت أنا الكاتب ماذا كنت ستضيف أو تغيير في الكتاب ؟"
+                  value={review.potentialAdditions}
+                  onChange={handleReviewChange}
+                  required
+                />
+                {errors.potentialAdditions && <p className="error-message">{errors.potentialAdditions}</p>}
+                
+                <textarea 
+                  name="personalImpact"
+                  placeholder="أفكار أو أحداث لامستك شخصيًا"
+                  value={review.personalImpact}
+                  onChange={handleReviewChange}
+                  required
+                />
+                {errors.personalImpact && <p className="error-message">{errors.personalImpact}</p>}
+              </div>
+
+             
             </div>
-            {(errors.readingStartDate || errors.readingEndDate) && (
-              <div className="date-validation-info">
-                <p>💡 تأكد من اختيار تاريخ البدء قبل تاريخ الانتهاء</p>
-              </div>
-            )}
+            <div className="modal-actions">
+              <button 
+                onClick={handleSubmit} 
+                className="submit-btn" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <FaSpinner className="fa-spin" />
+                ) : (
+                  'إرسال التقييم'
+                )}
+              </button>
+              <button 
+                onClick={onClose} 
+                className="cancel-btn" 
+                disabled={isSubmitting}
+              >
+                إلغاء
+              </button>
+            </div>
           </div>
-          <div className="review-group">
-            <h3>أسلوب الكتابة والأفكار</h3>
-            <textarea 
-              name="authorStyle"
-              placeholder="رأيك بأسلوب الكاتب"
-              value={review.authorStyle}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.authorStyle && <p className="error-message">{errors.authorStyle}</p>}
-            
-            <textarea 
-              name="keyIdeas"
-              placeholder="ملخص لأهم الأفكار والأحداث"
-              value={review.keyIdeas}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.keyIdeas && <p className="error-message">{errors.keyIdeas}</p>}
-            
-            <textarea 
-              name="likedIdeas"
-              placeholder="أفكار أعجبتك"
-              value={review.likedIdeas}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.likedIdeas && <p className="error-message">{errors.likedIdeas}</p>}
-            
-            <textarea 
-              name="dislikedIdeas"
-              placeholder="أفكار لم تعجبك"
-              value={review.dislikedIdeas}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.dislikedIdeas && <p className="error-message">{errors.dislikedIdeas}</p>}
-          </div>
-
-          <div className="review-group">
-            <h3>الاقتباسات والتأثير الشخصي</h3>
-            <textarea 
-              name="memorableQuotes"
-              placeholder="عبارات واقتباسات مميزة"
-              value={review.memorableQuotes}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.memorableQuotes && <p className="error-message">{errors.memorableQuotes}</p>}
-            
-            <textarea 
-              name="potentialAdditions"
-              placeholder="لو كنت أنا الكاتب ماذا كنت ستضيف أو تغيير في الكتاب ؟"
-              value={review.potentialAdditions}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.potentialAdditions && <p className="error-message">{errors.potentialAdditions}</p>}
-            
-            <textarea 
-              name="personalImpact"
-              placeholder="أفكار أو أحداث لامستك شخصيًا"
-              value={review.personalImpact}
-              onChange={handleReviewChange}
-              required
-            />
-            {errors.personalImpact && <p className="error-message">{errors.personalImpact}</p>}
-          </div>
-
-         
-        </div>
-        <div className="modal-actions">
-          <button 
-            onClick={handleSubmit} 
-            className="submit-btn" 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <FaSpinner className="fa-spin" />
-            ) : (
-              'إرسال التقييم'
-            )}
-          </button>
-          <button 
-            onClick={onClose} 
-            className="cancel-btn" 
-            disabled={isSubmitting}
-          >
-            إلغاء
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

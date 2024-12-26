@@ -336,10 +336,30 @@ export default function TeacherBooks() {
         const newRatings = {
           ...prevRatings,
           [correctStudentId]: {
-            ...(prevRatings[correctStudentId] || {}),
-            [skillId]: processedValue
+            ...(prevRatings[correctStudentId] || {})
           }
         };
+
+        // إذا كان التقييم هو الحضور
+        if (skillId === 'attendance') {
+          newRatings[correctStudentId][skillId] = processedValue;
+          
+          // إذا كان الطالب غائب، نضع جميع المهارات الأخرى كصفر داخليًا
+          if (processedValue === 'لا') {
+            evaluationCriteria.forEach(criteria => {
+              if (criteria.type === 'rating') {
+                // نضع القيمة 0 داخليًا ولكن لا نظهرها في واجهة المستخدم
+                newRatings[correctStudentId][criteria.id] = 0;
+              }
+            });
+          }
+        } else {
+          // إذا كان الطالب حاضر فقط نسمح بتقييم المهارات الأخرى
+          const isStudentPresent = newRatings[correctStudentId]['attendance'] === 'نعم';
+          if (isStudentPresent) {
+            newRatings[correctStudentId][skillId] = processedValue;
+          }
+        }
         
         // حفظ التقييمات الجديدة في bookRatings
         if (selectedBook) {
@@ -375,6 +395,13 @@ export default function TeacherBooks() {
   // Function to check if all ratings are complete for a student
   const areAllRatingsComplete = (studentId) => {
     const studentRating = studentRatings[studentId] || {};
+    
+    // إذا كان الطالب غائب، نعتبر تقييماته مكتملة تلقائياً
+    if (studentRating['attendance'] === 'لا') {
+      return true;
+    }
+
+    // للطلاب الحاضرين فقط نتحقق من اكتمال جميع التقييمات
     return evaluationCriteria
       .filter(criteria => criteria.type === 'rating' || criteria.type === 'attendance')
       .every(criteria => studentRating[criteria.id] && studentRating[criteria.id] !== "اختر");
@@ -396,16 +423,21 @@ export default function TeacherBooks() {
       return;
     }
 
-    // التحقق من اكتمال جميع التقييمات
+    // التحقق من اكتمال التقييمات للطلاب الحاضرين فقط
     const hasIncompleteRatings = ratedStudentIds.some(studentId => {
       const studentRating = studentRatings[studentId] || {};
+      // نتجاهل التحقق للطلاب الغائبين
+      if (studentRating['attendance'] === 'لا') {
+        return false;
+      }
+      // نتحقق فقط من الطلاب الحاضرين
       return evaluationCriteria
         .filter(criteria => criteria.type === 'rating' || criteria.type === 'attendance')
         .some(criteria => !studentRating[criteria.id] || studentRating[criteria.id] === "اختر");
     });
 
     if (hasIncompleteRatings) {
-      showNotification('يجب تقييم جميع المهارات لكل طالب قبل الحفظ النهائي', 'warning');
+      showNotification('يجب تقييم جميع المهارات للطلاب الحاضرين قبل الحفظ النهائي', 'warning');
       return;
     }
 
@@ -429,24 +461,27 @@ export default function TeacherBooks() {
 
     try {
       for (const studentId of ratedStudentIds) {
+        const isStudentAbsent = studentRatings[studentId]?.attendance === 'لا';
+        const defaultValue = isStudentAbsent ? 0 : 1;
+
         const ratingData = {
           bookId: currentBookId,
           ratings: {
             attendance: studentRatings[studentId]?.attendance || 'لا',
-            completeReading: studentRatings[studentId]?.completeReading || 1,
-            deepUnderstanding: studentRatings[studentId]?.deepUnderstanding || 1,
-            personalReflection: studentRatings[studentId]?.personalReflection || 1,
-            confidenceExpression: studentRatings[studentId]?.confidenceExpression || 1,
-            creativeIdeas: studentRatings[studentId]?.creativeIdeas || 1,
-            lifeConnectionThinking: studentRatings[studentId]?.lifeConnectionThinking || 1,
-            independentThinking: studentRatings[studentId]?.independentThinking || 1,
-            clearCommunication: studentRatings[studentId]?.clearCommunication || 1,
-            activeListening: studentRatings[studentId]?.activeListening || 1,
-            constructiveInteraction: studentRatings[studentId]?.constructiveInteraction || 1,
-            activeParticipation: studentRatings[studentId]?.activeParticipation || 1,
-            respectDiversity: studentRatings[studentId]?.respectDiversity || 1,
-            buildingFriendships: studentRatings[studentId]?.buildingFriendships || 1,
-            collaboration: studentRatings[studentId]?.collaboration || 1
+            completeReading: studentRatings[studentId]?.completeReading || defaultValue,
+            deepUnderstanding: studentRatings[studentId]?.deepUnderstanding || defaultValue,
+            personalReflection: studentRatings[studentId]?.personalReflection || defaultValue,
+            confidenceExpression: studentRatings[studentId]?.confidenceExpression || defaultValue,
+            creativeIdeas: studentRatings[studentId]?.creativeIdeas || defaultValue,
+            lifeConnectionThinking: studentRatings[studentId]?.lifeConnectionThinking || defaultValue,
+            independentThinking: studentRatings[studentId]?.independentThinking || defaultValue,
+            clearCommunication: studentRatings[studentId]?.clearCommunication || defaultValue,
+            activeListening: studentRatings[studentId]?.activeListening || defaultValue,
+            constructiveInteraction: studentRatings[studentId]?.constructiveInteraction || defaultValue,
+            activeParticipation: studentRatings[studentId]?.activeParticipation || defaultValue,
+            respectDiversity: studentRatings[studentId]?.respectDiversity || defaultValue,
+            buildingFriendships: studentRatings[studentId]?.buildingFriendships || defaultValue,
+            collaboration: studentRatings[studentId]?.collaboration || defaultValue
           },
           isComplete: areAllRatingsComplete(studentId)
         };

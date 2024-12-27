@@ -488,6 +488,16 @@ export default function DataContextFunction({ children }) {
     }
   };
 
+  const getTeacherRatingsforstudent = async (bookId) => {
+    try {
+      const response = await axios.get(`https://school-book-clubs-backend.vercel.app/api/RateTeacher/book/${bookId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching teacher ratings:', error);
+      return null;
+    }
+  };
+
   // Add the function to get student ratings
   async function getStudentRatingsBooks(studentId) {
     try {
@@ -631,6 +641,7 @@ export default function DataContextFunction({ children }) {
         getTeacherBooks,
         getBookStudentRatingsWithDetails,
         getBookStudentSelfAssessmentsWithDetails,
+        getTeacherRatingsforstudent,
       }}
     >
       {children}

@@ -6,7 +6,7 @@ import { DataContext } from '../../context/context.js';
 import "./TeacherBooks.css"
 
 export default function TeacherBooks() {
-  const { fetchTeacherBooks, deleteBook, updateBook, fetchStudentsBySchoolCode, rateStudent } = useContext(DataContext);
+  const { fetchTeacherBooks, deleteBook, updateBook, fetchStudentsBySchoolCode, rateStudent, getTeacherRatingsforstudent } = useContext(DataContext);
   const [books, setBooks] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +41,13 @@ export default function TeacherBooks() {
 
   // Add new state for confirmation modal
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
+  // Add new state for existing ratings modal
+  const [showExistingRatingsModal, setShowExistingRatingsModal] = useState(false);
+
+  // Add loading state for rating button
+  const [loadingRating, setLoadingRating] = useState(false);
+  const [loadingBookId, setLoadingBookId] = useState(null);
 
   // Validation schema for book update
   const bookUpdateSchema = Yup.object().shape({
@@ -510,15 +517,6 @@ export default function TeacherBooks() {
       setShowRatingModal(false);
       setSelectedBook(null);
       setIsRatingSubmitting(false);
-
-      // إعادة فتح نافذة التقييم للكتاب نفسه
-      setTimeout(() => {
-        const bookToReselect = books.find(book => book._id === currentBookId);
-        if (bookToReselect) {
-          setSelectedBook(bookToReselect);
-          setShowRatingModal(true);
-        }
-      }, 100);
     }
   };
 
@@ -632,6 +630,30 @@ export default function TeacherBooks() {
     setShowRatingModal(true);
   };
 
+  // Handle rating button click
+  const handleRateButtonClick = async (book) => {
+    try {
+      setLoadingRating(true);
+      setLoadingBookId(book._id);
+      const ratingsResponse = await getTeacherRatingsforstudent(book._id);
+      if (ratingsResponse && ratingsResponse.ratings && ratingsResponse.ratings.length > 0) {
+        setSelectedBook(book);
+        setShowExistingRatingsModal(true);
+      } else {
+        setSelectedBook(book);
+        setShowRatingModal(true);
+      }
+    } catch (error) {
+      console.error('Error checking existing ratings:', error);
+      // If there's an error, we'll allow rating as a fallback
+      setSelectedBook(book);
+      setShowRatingModal(true);
+    } finally {
+      setLoadingRating(false);
+      setLoadingBookId(null);
+    }
+  };
+
   // Render rating modal with a traditional table
   const renderRatingModal = () => {
     return (
@@ -703,6 +725,23 @@ export default function TeacherBooks() {
     );
   };
 
+  // Add ExistingRatingsModal component
+  const ExistingRatingsModal = () => (
+    <Modal show={showExistingRatingsModal} onHide={() => setShowExistingRatingsModal(false)} centered>
+      <Modal.Header className='bg-warning'>
+        <Modal.Title >تنبيه</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p className='text-dark'>لقد قمت بتقييم الطلاب على هذا الكتاب مسبقاً</p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowExistingRatingsModal(false)}>
+          إغلاق
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+
   // Render loading or error state
   if (loading) return (
     <div 
@@ -762,9 +801,24 @@ export default function TeacherBooks() {
             <div className="d-flex justify-content-between">
               <Button 
                 variant="primary" 
-                onClick={() => openRatingModal(book)}
+                onClick={() => handleRateButtonClick(book)}
+                disabled={loadingRating && loadingBookId === book._id}
               >
-                تقييم الطلاب
+                {loadingRating && loadingBookId === book._id ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      className="me-2"
+                    />
+                    جاري التحقق...
+                  </>
+                ) : (
+                  'تقييم الطلاب'
+                )}
               </Button>
               <Button 
                 variant="warning" 
@@ -1001,6 +1055,8 @@ export default function TeacherBooks() {
       </Modal>
 
       {renderRatingModal()}
+
+      <ExistingRatingsModal />
 
       {/* Confirmation Modal */}
       <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)} centered>

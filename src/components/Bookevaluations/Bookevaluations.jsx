@@ -17,8 +17,15 @@ export default function Bookevaluations() {
         const data = await getStudentBookRatings();
         if (data?.ratings) {
           setRatings(data.ratings);
-          // Extract unique books from ratings
-          const uniqueBooks = [...new Set(data.ratings.map(rating => rating.bookId))];
+          // Create a Map to store unique books using bookId as key
+          const uniqueBooksMap = new Map();
+          data.ratings.forEach(rating => {
+            if (!uniqueBooksMap.has(rating.bookId._id)) {
+              uniqueBooksMap.set(rating.bookId._id, rating.bookId);
+            }
+          });
+          // Convert Map values to array
+          const uniqueBooks = Array.from(uniqueBooksMap.values());
           setBooks(uniqueBooks);
           if (uniqueBooks.length > 0) {
             setSelectedBook(uniqueBooks[0]._id);

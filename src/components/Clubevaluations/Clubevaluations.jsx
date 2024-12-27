@@ -13,6 +13,7 @@ export default function Clubevaluations() {
       setIsLoading(true);
       try {
         const response = await getReadingClubEvaluations();
+          console.log("responseclubevaluations , " , response);
         if (response?.success && Array.isArray(response.data)) {
           setEvaluations(response.data);
         } else {
@@ -42,6 +43,15 @@ export default function Clubevaluations() {
     return translations[field] || field;
   };
 
+  const evaluationQuestions = [
+    { field: 'readingPerspectiveChange', label: 'كيف تغيرت نظرتك للقراءة بعد الانضمام للنادي؟' },
+    { field: 'mostBeneficialAspect', label: 'ما هو أكثر شيء استفدت منه في النادي؟' },
+    { field: 'readingSkillsImprovement', label: 'هل تشعر بتحسن في مهاراتك القرائية؟ كيف؟' },
+    { field: 'mostLikedAspect', label: 'أكثر شيء أعجبك في النادي' },
+    { field: 'leastLikedAspect', label: 'أكثر شيء لم يعجبك في النادي' },
+    { field: 'booksToAddToNextList', label: 'الكتب المقترحة للقائمة القادمة', isList: true }
+  ];
+
   if (isLoading) {
     return (
       <div className="loading-container">
@@ -55,7 +65,7 @@ export default function Clubevaluations() {
     return (
       <div className="club-evaluations">
         <Container className="evaluation-container">
-          <h1 className="evaluation-title">تقييمات نادي القراءة المدرسي</h1>
+          <h1 className="evaluation-title">تقييمات الطلاب علي أندية القراءة المدرسية</h1>
           <div className="no-data-message text-dark">لا توجد تقييمات متاحة</div>
         </Container>
       </div>
@@ -65,61 +75,48 @@ export default function Clubevaluations() {
   return (
     <div className="club-evaluations">
       <Container className="evaluation-container">
-        <h1 className="evaluation-title">تقييمات نادي القراءة المدرسي</h1>
+        <h1 className="evaluation-title">تقييمات الطلاب علي أندية القراءة المدرسية</h1>
         <div className="table-responsive">
           <Table responsive bordered hover className="evaluation-table">
             <thead>
               <tr>
-                <th className='text-dark fw-bold' style={{ fontSize: '20px' }}>التقييمات</th>
+                <th className='text-dark fw-bold text-center' style={{ fontSize: '18px', width: '25%' }}>التقييمات</th>
                 {evaluations.map((evaluation) => (
-                  <th key={evaluation._id} className="student-name text-dark fw-bold" style={{ fontSize: '20px' }}>{evaluation.studentId.name}</th>
+                  <th 
+                    key={evaluation._id} 
+                    className="text-dark fw-bold text-center" 
+                    style={{ fontSize: '18px' }}
+                  >
+                    {evaluation.studentId.name}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>كيف تغيرت نظرتك للقراءة بعد الانضمام للنادي؟</td>
-                {evaluations.map((evaluation) => (
-                  <td key={evaluation._id} className="evaluation-text">{evaluation.readingPerspectiveChange}</td>
-                ))}
-              </tr>
-              <tr>
-                <td>ما هو أكثر شيء استفدت منه في النادي؟</td>
-                {evaluations.map((evaluation) => (
-                  <td key={evaluation._id} className="evaluation-text">{evaluation.mostBeneficialAspect}</td>
-                ))}
-              </tr>
-              <tr>
-                <td>هل تشعر بتحسن في مهاراتك القرائية؟ كيف؟</td>
-                {evaluations.map((evaluation) => (
-                  <td key={evaluation._id} className="evaluation-text">{evaluation.readingSkillsImprovement}</td>
-                ))}
-              </tr>
-              <tr>
-                <td>أكثر شيء أعجبك في النادي</td>
-                {evaluations.map((evaluation) => (
-                  <td key={evaluation._id} className="evaluation-text">{evaluation.mostLikedAspect}</td>
-                ))}
-              </tr>
-              <tr>
-                <td>أكثر شيء لم يعجبك في النادي</td>
-                {evaluations.map((evaluation) => (
-                  <td key={evaluation._id} className="evaluation-text">{evaluation.leastLikedAspect}</td>
-                ))}
-              </tr>
-              <tr>
-                <td>ما الكتب التي قرأتها وتريد أن تضيفها إلى قائمة نادي القراءة القادم</td>
-                {evaluations.map((evaluation) => (
-                  <td key={evaluation._id}>
-                    <ul className="books-list">
-                      {evaluation.booksToAddToNextList.map((book, index) => (
-                        <li key={index}>{book}</li>
-                      ))}
-                    </ul>
-                  </td>
-                ))}
-              </tr>
-             
+              {evaluationQuestions.map(({ field, label, isList }) => (
+                <tr key={field}>
+                  <td className="fw-bold text-dark">{label}</td>
+                  {evaluations.map((evaluation) => (
+                    <td 
+                      key={`${field}-${evaluation._id}`} 
+                      className="evaluation-text"
+                      style={{ textAlign: 'right', padding: '10px' }}
+                    >
+                      {isList ? (
+                        <ul className="books-list" style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+                          {evaluation[field]
+                            .filter(book => book && book.trim())
+                            .map((book, index) => (
+                              <li key={index} style={{ marginBottom: '5px' }}>{book}</li>
+                            ))}
+                        </ul>
+                      ) : (
+                        evaluation[field]
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
             </tbody>
           </Table>
         </div>

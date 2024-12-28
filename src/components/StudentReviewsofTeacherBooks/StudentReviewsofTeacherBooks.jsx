@@ -52,7 +52,7 @@ export default function StudentReviewsofTeacherBooks() {
                             }}>
                                 <FaBook size={50} />
                                 <h3 className="mt-3 mb-2 text-light">تقييمات الكتب</h3>
-                                <p className="mb-0 text-light">متابعة تقييمات الطلاب للكتب المدرسية</p>
+                                <p className="mb-0 text-light">متابعة تقييمات الطلاب للكتب </p>
                             </div>
                             <Card.Body className="text-center">
                                 <p style={{ fontSize: '1.1rem', color: '#666' }}>
@@ -100,7 +100,7 @@ export default function StudentReviewsofTeacherBooks() {
                             </div>
                             <Card.Body className="text-center">
                                 <p style={{ fontSize: '1.1rem', color: '#666' }}>
-                                    عرض جميع التقييمات الذاتية للطلاب وتطورهم
+                                    عرض جميع التقييمات الذاتية للطلاب 
                                 </p>
                                 <div className="mt-3 d-flex align-items-center justify-content-center" style={{ color: '#FF512F' }}>
                                     <span className="me-2">عرض التقييمات</span>

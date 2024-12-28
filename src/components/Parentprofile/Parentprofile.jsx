@@ -30,7 +30,8 @@ const Parentprofile = () => {
           name: decodedToken.name,
           role: decodedToken.role,
           studentCode: decodedToken.studentCode || 'غير محدد',
-          phone: decodedToken.phone || 'غير محدد'
+          phone: decodedToken.phone || 'غير محدد',
+          studentName: decodedToken.studentName
         });
       } catch (error) {
         console.error('Error decoding token:', error);
@@ -61,7 +62,7 @@ const Parentprofile = () => {
       alert('حدث خطأ أثناء تحديث الملف الشخصي');
     }
   };
-
+console.log("userData , " , userData)
   return (
     <>
       <Helmet>
@@ -100,6 +101,10 @@ const Parentprofile = () => {
                   <Col md={6} className="mb-3">
                     <strong>رقم الهاتف:</strong>
                     <p>{userData.phone}</p>
+                  </Col>
+                  <Col md={6} className="mb-3">
+                    <strong>اسم الطالب:</strong>
+                    <p>{userData.studentName}</p>
                   </Col>
                 </Row>
               </Card.Body>

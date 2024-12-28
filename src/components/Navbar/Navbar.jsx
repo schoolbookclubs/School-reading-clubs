@@ -86,7 +86,7 @@ const MainNavbar = () => {
           { to: '/books', text: 'اضافة كتاب' },
           { to: '/Teacherbooks', text: 'الكتب و التقييم' },
           { to: '/TeacherEvaluationsOfStudents', text: 'تقييمات المعلم للطلاب' },
-          { to: '/StudentReviewsofTeacherBooks', text: 'تقييمات الطلاب لكتب المعلم' },
+          { to: '/StudentReviewsofTeacherBooks', text: 'تقييمات الطلاب للكتب ' },
           { to: '/TeacherGuide', text: 'دليل المعلم' }
         ];
         break;

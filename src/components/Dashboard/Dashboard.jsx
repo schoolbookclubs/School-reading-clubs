@@ -88,14 +88,14 @@ export default function Dashboard() {
     {
       icon: 'fa-user',
       title: 'الملف الشخصي',
-      description: 'إدارة معلوماتك الشخصية',
+      description: 'عرض معلومات المستخدم',
       link: '/Parentprofile',
       buttonText: 'عرض الملف'
     },
     {
       icon: 'fa-chart-line',
       title: 'تقييم الأداء',
-      description: 'أدخل تقييمك بناءا علي تغير سلوك ابنك اثناء رحلته مع برنامج أندية القراءة المدرسية',
+      description: 'أدخل تقييمك بناء علي تغير سلوك ابنك اثناء رحلته مع برنامج أندية القراءة المدرسية',
       link: '/Parentassessment',
       buttonText: 'تقييم الأداء'
     }
@@ -106,7 +106,7 @@ export default function Dashboard() {
     {
       icon: 'fa-chalkboard-teacher',
       title: 'تقييمات المعلمين',
-      description: 'تحليل شامل لتقييمات المعلمين للطلاب',
+      description: 'تحليل تقييم المعلمين للطالب',
       link: '/admin/OneSchoolTeacherEvaluations',
       color: 'linear-gradient(135deg, #ff6b6b 0%, #ff9a9a 100%)',
       details: [
@@ -118,7 +118,7 @@ export default function Dashboard() {
     {
       icon: 'fa-graduation-cap',
       title: 'تقييمات الطلاب',
-      description: 'تتبع دقيق لأداء الطلاب في نادي الكتاب',
+      description: 'متابعة أداء الطالب في النادي',
       link: '/admin/OneSchoolStusentEvaluations',
       color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
       details: [
@@ -130,13 +130,13 @@ export default function Dashboard() {
     {
       icon: 'fa-user-friends',
       title: 'تقييمات أولياء الأمور',
-      description: 'مراجعة معمقة لتقييمات أولياء الأمور',
+      description: 'مراجعة تقييمات أولياء الأمور',
       link: '/admin/OneSchoolParentEvaluations',
       color: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
       details: [
         { label: 'عرض أولياء الأمور', value: '', icon: 'fa-user-shield' },
-        { label: 'رضائهم بالنادي', value: '', icon: 'fa-smile' },
-        { label: 'تقييم اداء طالبه', value: '', icon: 'fa-clipboard-check' }
+        { label: 'رضاهم بالنادي', value: '', icon: 'fa-smile' },
+        { label: 'تقييم اداء الابناء', value: '', icon: 'fa-clipboard-check' }
       ]
     }
   ];

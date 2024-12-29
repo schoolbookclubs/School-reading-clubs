@@ -131,6 +131,7 @@ export default function WelcomePage() {
           </div>
         </Container>
       </section>
+      
     </div>
   );
 }
